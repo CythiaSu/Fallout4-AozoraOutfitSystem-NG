@@ -1,0 +1,35 @@
+{
+  "modName": "OutfitManager",
+  "keybinds": [
+    {
+      "id": "OM_MenuHotkey",
+      "desc": "打开/关闭青空的服装管理系统",
+      "action": { "type": "CallGlobalFunction", "script": "OutfitManager", "function": "OnMcmMenuHotkey" }
+    },
+    {
+      "id": "OM_SaveHotkey",
+      "desc": "保存套装",
+      "action": { "type": "CallGlobalFunction", "script": "OutfitManager", "function": "OnMcmSaveHotkey" }
+    },
+    {
+      "id": "OM_LoadHotkey",
+      "desc": "装备当前套装",
+      "action": { "type": "CallGlobalFunction", "script": "OutfitManager", "function": "OnMcmLoadHotkey" }
+    },
+    {
+      "id": "OM_RandomHotkey",
+      "desc": "随机换装",
+      "action": { "type": "CallGlobalFunction", "script": "OutfitManager", "function": "OnMcmRandomHotkey" }
+    },
+    {
+      "id": "OM_NextOutfitHotkey",
+      "desc": "装备下一套",
+      "action": { "type": "CallGlobalFunction", "script": "OutfitManager", "function": "OnMcmNextOutfitHotkey" }
+    },
+    {
+      "id": "OM_PreviousOutfitHotkey",
+      "desc": "装备上一套",
+      "action": { "type": "CallGlobalFunction", "script": "OutfitManager", "function": "OnMcmPreviousOutfitHotkey" }
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "globalScale": 100,
+  "titleScale": 100,
+  "bodyScale": 100,
+  "menuScale": 100,
+  "auxiliaryScale": 100,
+  "footerScale": 100,
+  "description": "Global scaling is the shared entry point. Final per-page type sizes are defined by the active ui-layout preset."
+}

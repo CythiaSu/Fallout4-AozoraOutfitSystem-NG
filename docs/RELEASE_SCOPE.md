@@ -1,6 +1,6 @@
 # Stable Release Scope
 
-This repository contains the final 2.0.4 source line and the previous 2.0.3 source line for reference.
+This repository contains the final 2.0.5 source line and the previous 2.0.4 and 2.0.3 source lines for reference.
 
 Excluded from the repository:
 

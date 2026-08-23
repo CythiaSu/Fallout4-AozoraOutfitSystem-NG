@@ -4,7 +4,7 @@
 
 1. Install the Fallout 4/CommonLibF4 development dependencies and the x64
    Visual Studio toolchain
-2. Open either `CHS/2.0.4/Native` or `EN/2.0.4/Native`
+2. Open either `CHS/2.0.5/Native` or `EN/2.0.5/Native`
 3. Make the CommonLibF4 and spdlog paths available to the local build setup
 4. Build with the repository's `xmake.lua`
 

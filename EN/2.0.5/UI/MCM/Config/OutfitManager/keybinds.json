@@ -1,0 +1,35 @@
+{
+  "modName": "OutfitManager",
+  "keybinds": [
+    {
+      "id": "OM_MenuHotkey",
+      "desc": "Open/Close Aozora Outfit Management System",
+      "action": { "type": "CallGlobalFunction", "script": "OutfitManager", "function": "OnMcmMenuHotkey" }
+    },
+    {
+      "id": "OM_SaveHotkey",
+      "desc": "Save Outfit",
+      "action": { "type": "CallGlobalFunction", "script": "OutfitManager", "function": "OnMcmSaveHotkey" }
+    },
+    {
+      "id": "OM_LoadHotkey",
+      "desc": "Equip Active Outfit",
+      "action": { "type": "CallGlobalFunction", "script": "OutfitManager", "function": "OnMcmLoadHotkey" }
+    },
+    {
+      "id": "OM_RandomHotkey",
+      "desc": "Random Outfit",
+      "action": { "type": "CallGlobalFunction", "script": "OutfitManager", "function": "OnMcmRandomHotkey" }
+    },
+    {
+      "id": "OM_NextOutfitHotkey",
+      "desc": "Equip Next Outfit",
+      "action": { "type": "CallGlobalFunction", "script": "OutfitManager", "function": "OnMcmNextOutfitHotkey" }
+    },
+    {
+      "id": "OM_PreviousOutfitHotkey",
+      "desc": "Equip Previous Outfit",
+      "action": { "type": "CallGlobalFunction", "script": "OutfitManager", "function": "OnMcmPreviousOutfitHotkey" }
+    }
+  ]
+}

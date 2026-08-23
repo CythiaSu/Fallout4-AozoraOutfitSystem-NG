@@ -1,6 +1,6 @@
 # Fallout 4 Aozora Outfit System
 
-[![Stable Release](https://img.shields.io/badge/stable-2.0.4-20a05a)](https://github.com/CythiaSu/Fallout4-AozoraOutfitSystem)
+[![Stable Release](https://img.shields.io/badge/stable-2.0.5-20a05a)](https://github.com/CythiaSu/Fallout4-AozoraOutfitSystem)
 [![Languages](https://img.shields.io/badge/languages-CHS%20%7C%20EN-2f81f7)](https://github.com/CythiaSu/Fallout4-AozoraOutfitSystem/tree/main/CHS)
 [![Input](https://img.shields.io/badge/input-keyboard%20%2B%20gamepad-8b5cf6)](https://github.com/CythiaSu/Fallout4-AozoraOutfitSystem)
 
@@ -16,7 +16,7 @@ The latest Fallout 4 AE version (1.11.240) is not supported at this time.
 
 ## 中文
 
-Aozora Outfit Management System 2.0.4 是由 Fallout4 Outfit Manager 全面升级而来的稳定版服装管理系统。
+Aozora Outfit Management System 2.0.5 是由 Fallout4 Outfit Manager 全面升级而来的稳定版服装管理系统。
 
 项目包含 F4SE 原生插件、Papyrus 接口、Prisma UI 页面、MCM 配置和独立的中英文源码目录。
 
@@ -26,7 +26,7 @@ Aozora Outfit Management System 2.0.4 是由 Fallout4 Outfit Manager 全面升�
 --- | ---
 [ SLOT ] | 支持 500 个套装槽位，可保存、命名、清空、还原并切换上一套或下一套
 [ PREVIEW ] | 在玩家或符合条件的 NPC 身上预览套装，确认后才会正式换装
-[ STUDIO ] | 从角色当前真实穿着进入工作台，支持穿戴、脱下、保存和继续搭配
+[ STUDIO ] | 服装工作台默认关闭，可在 MCM 高级选项中开启
 [ MATERIAL ] | 主要支持使用 MSWP 记录的 MOD 服装材质交换与永久物品生成
 [ OMOD ] | 只要改装最终表现为基础物品加 OMOD 数据，就可以尝试保存和还原
 [ NPC ] | 支持玩家和符合条件的人形 NPC；仅过滤不支持穿衣的动物、怪物与机器人
@@ -56,15 +56,15 @@ Aozora Outfit Management System 2.0.4 是由 Fallout4 Outfit Manager 全面升�
 ### 仓库结构
 
 ~~~text
-CHS/2.0.4/      中文源码、Papyrus、UI 和 MCM 配置
-EN/2.0.4/       English source, Papyrus, UI, and MCM configuration
+CHS/2.0.5/      中文源码、Papyrus、UI 和 MCM 配置
+EN/2.0.5/       English source, Papyrus, UI, and MCM configuration
 tools/           UI 检查、布局验证和资源处理工具
 docs/            构建说明与稳定版范围说明
 ~~~
 
 ### 构建
 
-原生插件使用 xmake.lua 和 CommonLibF4 构建，请从 CHS/2.0.4/Native 或 EN/2.0.4/Native 目录选择对应语言版本。
+原生插件使用 xmake.lua 和 CommonLibF4 构建，请从 CHS/2.0.5/Native 或 EN/2.0.5/Native 目录选择对应语言版本。
 
 Papyrus 源码位于对应语言的 Papyrus/Source/User 目录，需要使用 Caprica 或兼容的 Fallout 4 Papyrus 编译器单独编译。
 
@@ -74,7 +74,7 @@ Papyrus 源码位于对应语言的 Papyrus/Source/User 目录，需要使用 Ca
 
 ## English
 
-Aozora Outfit Management System 2.0.4 is the stable full upgrade of Fallout4 Outfit Manager.
+Aozora Outfit Management System 2.0.5 is the stable full upgrade of Fallout4 Outfit Manager.
 
 The repository contains the native F4SE plugin source, Papyrus bindings, Prisma UI pages, MCM configuration, and separate CHS/EN source directories.
 
@@ -84,7 +84,7 @@ Marker | Feature
 --- | ---
 [ SLOT ] | Up to 500 outfit slots with save, rename, clear, restore, previous, and next actions
 [ PREVIEW ] | Preview outfits on the player or eligible NPCs before confirming the change
-[ STUDIO ] | Start from the character's actual outfit and continue browsing, equipping, unequipping, saving, and editing
+[ STUDIO ] | Disabled by default; enable Outfit Studio under MCM Advanced Options when needed
 [ MATERIAL ] | Material Swap preview and permanent item generation primarily for mod clothing using MSWP records
 [ OMOD ] | Workbench or third-party modifications can be restored when their final state is a base item plus OMOD data
 [ NPC ] | Player and eligible humanoid NPC management with only non-wearable animals, creatures, and robots filtered out
@@ -114,15 +114,15 @@ Weapon saving retains standard modifications and legendary effects, while recogn
 ### Repository Structure
 
 ~~~text
-CHS/2.0.4/      Chinese source, Papyrus, UI, and MCM configuration
-EN/2.0.4/       English source, Papyrus, UI, and MCM configuration
+CHS/2.0.5/      Chinese source, Papyrus, UI, and MCM configuration
+EN/2.0.5/       English source, Papyrus, UI, and MCM configuration
 tools/           UI checks, layout validation, and asset utilities
 docs/            Build instructions and stable release scope
 ~~~
 
 ### Build
 
-Build the native plugin with xmake.lua and CommonLibF4 from either CHS/2.0.4/Native or EN/2.0.4/Native.
+Build the native plugin with xmake.lua and CommonLibF4 from either CHS/2.0.5/Native or EN/2.0.5/Native.
 
 Compile the Papyrus sources under the selected language's Papyrus/Source/User directory with Caprica or a compatible Fallout 4 Papyrus compiler.
 
