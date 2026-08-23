@@ -1,0 +1,67 @@
+{
+  "modName": "OutfitManager",
+  "displayName": "Aozora Outfit Management System",
+  "minMcmVersion": 1,
+  "pluginRequirements": ["OutfitManager.esp"],
+  "content": [
+    { "type": "section", "text": "System Status" },
+    { "type": "text", "text": "Aozora Outfit Management System · Outfit saving, live preview, material customization, and character dressing" }
+  ],
+  "pages": [
+    {
+      "pageDisplayName": "Hotkeys",
+      "content": [
+        { "type": "section", "text": "Basic Actions" },
+        { "id": "OM_MenuHotkey", "type": "hotkey", "text": "Open/Close Management System", "help": "Open or close Aozora Outfit Management System", "valueOptions": { "allowModifierKeys": true } },
+        { "id": "OM_RandomHotkey", "type": "hotkey", "text": "Random Outfit", "help": "Equip the target with a random saved outfit that matches them.", "valueOptions": { "allowModifierKeys": true } },
+        { "type": "section", "text": "Active Outfit" },
+        { "type": "text", "text": "An outfit becomes active after it is confirmed in the UI or equipped with Random, Previous, or Next. The actions below start from that active outfit." },
+        { "id": "OM_PreviousOutfitHotkey", "type": "hotkey", "text": "Equip Previous Outfit", "help": "Cycle backward from the active outfit to an available outfit matching the target.", "valueOptions": { "allowModifierKeys": true } },
+        { "id": "OM_NextOutfitHotkey", "type": "hotkey", "text": "Equip Next Outfit", "help": "Cycle forward from the active outfit to an available outfit matching the target.", "valueOptions": { "allowModifierKeys": true } },
+        { "id": "OM_SaveHotkey", "type": "hotkey", "text": "Save Outfit", "help": "Save the target's current clothing to the active outfit, or the first empty slot when none is active.", "valueOptions": { "allowModifierKeys": true } },
+        { "id": "OM_LoadHotkey", "type": "hotkey", "text": "Equip Active Outfit", "help": "Equip the active outfit on the target again.", "valueOptions": { "allowModifierKeys": true } }
+      ]
+    },
+    {
+      "pageDisplayName": "General Settings",
+      "content": [
+        { "type": "section", "text": "General Settings" },
+        { "id": "bEnableOutfitNotifications:Profile1", "type": "switcher", "text": "Show Outfit Notifications", "help": "Show status notifications for dressing and saving.", "valueOptions": { "sourceType": "ModSettingBool" } },
+        { "type": "section", "text": "Weapon Saving" },
+        { "type": "text", "text": "When enabled, saved outfits include the equipped weapon, standard modifications, and legendary effects" },
+        { "type": "text", "text": "Applying an outfit creates a new independent weapon from the saved record instead of reusing one from inventory" },
+        { "type": "text", "text": "Recognizable unique or special Fallout4.esm modifications are filtered; standard modifications and legendary effects are retained" },
+        { "type": "text", "text": "Effects built into modded weapons, base records, scripts, or special data cannot be identified universally and may remain" },
+        { "type": "text", "text": "When the player or an NPC lacks the required ammo, the system silently supplies three magazines, from 30 to 180 rounds. Each ammo type is supplied once per actor per save" },
+        { "type": "text", "text": "Switching outfits removes the last system-generated weapon. When disabled, the studio does not load weapons and only clothing is saved or equipped" },
+        { "id": "bSaveOutfitWeapons:Profile1", "type": "switcher", "text": "Enable Weapon Saving", "help": "Save the equipped weapon, standard modifications, and legendary effects, then create a new independent weapon when applying the outfit. Disabled means the studio does not load weapons", "valueOptions": { "sourceType": "ModSettingBool" } }
+      ]
+    },
+    {
+      "pageDisplayName": "Prompts & Confirmations",
+      "content": [
+        { "type": "section", "text": "Studio Warning" },
+        { "id": "bWarnWorkbenchNudity:Profile1", "type": "switcher", "text": "Warn About Nudity Before Studio", "help": "Show a nudity warning before entering the studio. The studio always starts from the character's actual outfit. Enabled by default.", "valueOptions": { "sourceType": "ModSettingBool" } },
+        { "type": "section", "text": "Confirmation Dialogs" },
+        { "id": "bConfirmResetDefault:Profile1", "type": "switcher", "text": "Confirm Before Restoring Default", "valueOptions": { "sourceType": "ModSettingBool" } },
+        { "id": "bConfirmClearSavedOutfit:Profile1", "type": "switcher", "text": "Confirm Before Clearing an Outfit", "valueOptions": { "sourceType": "ModSettingBool" } },
+        { "id": "bConfirmOverwriteSavedOutfit:Profile1", "type": "switcher", "text": "Confirm Before Overwriting an Outfit", "valueOptions": { "sourceType": "ModSettingBool" } },
+        { "id": "bConfirmExitPreview:Profile1", "type": "switcher", "text": "Confirm Before Leaving Preview", "valueOptions": { "sourceType": "ModSettingBool" } },
+        { "id": "bConfirmDiscardStudioChanges:Profile1", "type": "switcher", "text": "Confirm Before Leaving Studio", "valueOptions": { "sourceType": "ModSettingBool" } },
+        { "id": "bConfirmDiscardMaterialPreview:Profile1", "type": "switcher", "text": "Confirm Before Leaving Material Preview", "valueOptions": { "sourceType": "ModSettingBool" } }
+      ]
+    },
+    {
+      "pageDisplayName": "About",
+      "content": [
+        { "type": "section", "text": "Aozora Outfit Management System" },
+        { "type": "text", "text": "Aozora Outfit Management System" },
+        { "type": "text", "text": "Upgraded from Fallout4 Outfit Manager with redesigned outfit preview, styling, material swap, and character dressing workflows" },
+        { "type": "section", "text": "Features" },
+        { "type": "text", "text": "Save and switch outfits for the player and NPCs, preview changes live, edit in the Outfit Studio, and create independent material variants" },
+        { "type": "section", "text": "Compatibility" },
+        { "type": "text", "text": "Plugin files, MCM identifiers, and data folders retain the OutfitManager name for compatibility with existing settings and outfits" }
+      ]
+    }
+  ]
+}

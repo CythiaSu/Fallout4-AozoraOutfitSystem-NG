@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>青空的服装管理系统</title>
+  <title>Aozora Outfit System</title>
   <link rel="preload" as="image" href="assets/mascot/home3-1.png">
   <style>
     :root {
@@ -1514,63 +1514,101 @@
     from { opacity: 0; }
     to { opacity: 1; }
   }
+
+  /* Release 2.0.3: keep English studio filters compact and on one row. */
+  .studio-grid .category-wrap {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 8px;
+    padding: 0 0 8px;
+    min-width: 0;
+    overflow: hidden;
+  }
+  .studio-grid .category-list {
+    flex: 1 1 auto;
+    min-width: 0;
+    width: auto;
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 5px;
+    overflow: hidden;
+    padding: 0;
+  }
+  .studio-grid .category-button {
+    flex: 0 0 auto;
+    min-width: 0;
+    padding-left: 7px;
+    padding-right: 7px;
+    white-space: nowrap;
+    font-size: calc(var(--om-category-button-size) * 0.88);
+  }
+  .studio-grid .category-meta {
+    flex: 0 0 auto;
+    margin-left: 0;
+    padding-left: 8px;
+    color: #b7d5c1;
+    font-size: max(11px, calc(var(--om-aux-size) * 0.88));
+    line-height: 1.2;
+    white-space: nowrap;
+  }
   </style>
 </head>
 <body>
-  <main class="app" aria-label="青空的服装管理系统">
+  <main class="app" aria-label="Aozora Outfit System">
     <header class="topbar">
       <div class="brand">
-        <h1 id="pageTitle">青空的服装管理系统</h1>
-        <div class="breadcrumb" id="breadcrumb">服装管理 / 当前角色</div>
+        <h1 id="pageTitle">Aozora Outfit System</h1>
+        <div class="breadcrumb" id="breadcrumb">Outfit Management / Current Character</div>
       </div>
       <div class="header-meta">
-        <div class="header-status" hidden><strong id="stageStatus">同步完成</strong><span id="stageTarget">玩家 · 女</span></div>
-        <div class="meta-line"><div class="input-badge" id="inputBadge">键盘</div></div>
+        <div class="header-status" hidden><strong id="stageStatus">Ready</strong><span id="stageTarget">Player · F</span></div>
+        <div class="meta-line"><div class="input-badge" id="inputBadge">Keyboard</div></div>
       </div>
     </header>
     <div class="shell-body">
       <section class="workspace"><div id="content"></div></section>
-      <aside class="stage" aria-label="游戏内角色实时预览区域"></aside>
+      <aside class="stage" aria-label="Live in-game character preview"></aside>
     </div>
     <footer class="footer" id="footer"></footer>
   </main>
   <div class="toast" id="toast" aria-live="polite"></div>
   <div class="rename-dialog" id="renameDialog" aria-hidden="true">
-    <div class="dialog-mascot"><img id="renameMascot" alt="系统助手" loading="eager" decoding="async"></div>
+    <div class="dialog-mascot"><img id="renameMascot" alt="System Assistant" loading="eager" decoding="async"></div>
     <div class="rename-card" role="dialog" aria-modal="true" aria-labelledby="renameTitle">
-      <div class="dialog-title-row"><div class="rename-title" id="renameTitle">命名套装</div></div>
-      <div class="rename-copy">外部中文命名：打开 slot-names.txt（UTF-8），按 <b>001 = 名称</b> 的格式改等号右侧；下次打开菜单自动刷新。游戏内输入建议只用英文；留空即可恢复默认名称。</div>
+      <div class="dialog-title-row"><div class="rename-title" id="renameTitle">Name Outfit</div></div>
+      <div class="rename-copy">External naming: open slot-names.txt (UTF-8) and edit the text after the equals sign using <b>001 = Name</b>. Names refresh when the menu reopens. Leave the value empty to restore the default name.</div>
       <input class="rename-input" id="renameInput" type="text" maxlength="24" autocomplete="off" spellcheck="false" disabled>
-      <div class="rename-actions"><button id="renameCancel">取消</button><button class="primary" id="renameConfirm">保存名称</button></div>
-      <div class="rename-shortcuts"><span id="renameKeyboardHelp">⌨ 键盘：Enter 确认　Tab 返回</span><span id="renameGamepadHelp">🎮 手柄：A 确认　B 返回</span></div>
+      <div class="rename-actions"><button id="renameCancel">Cancel</button><button class="primary" id="renameConfirm">Save Name</button></div>
+      <div class="rename-shortcuts"><span id="renameKeyboardHelp">⌨ Keyboard: Enter Confirm　Tab Back</span><span id="renameGamepadHelp">🎮 Gamepad: A Confirm　B Back</span></div>
     </div>
   </div>
   <div class="rename-dialog" id="confirmDialog" aria-hidden="true">
-    <div class="dialog-mascot"><img id="confirmMascot" alt="系统助手" loading="eager" decoding="async"></div>
+    <div class="dialog-mascot"><img id="confirmMascot" alt="System Assistant" loading="eager" decoding="async"></div>
     <div class="rename-card confirm-card" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
-      <div class="dialog-title-row"><div class="confirm-title" id="confirmTitle">保存套装</div></div>
+      <div class="dialog-title-row"><div class="confirm-title" id="confirmTitle">Save Outfit</div></div>
       <div class="confirm-copy" id="confirmCopy"></div>
-      <div class="confirm-options" id="confirmOptions"><button id="confirmCancel">继续查看</button><button id="confirmAlt">不应用并退出</button><button class="primary" id="confirmOk">应用并退出</button></div>
-      <div class="rename-shortcuts"><span>⌨ 键盘：E 确认　Tab 返回</span><span>🎮 手柄：←/→ 选择　A 确认　B 返回</span></div>
+      <div class="confirm-options" id="confirmOptions"><button id="confirmCancel">Keep Browsing</button><button id="confirmAlt">Exit Without Applying</button><button class="primary" id="confirmOk">Apply and Exit</button></div>
+      <div class="rename-shortcuts"><span>⌨ Keyboard: E Confirm　Tab Back</span><span>🎮 Gamepad: ←/→ Select　A Confirm　B Back</span></div>
     </div>
   </div>
   <div class="rename-dialog" id="saveTargetDialog" aria-hidden="true">
-    <div class="dialog-mascot"><img id="saveTargetMascot" alt="系统助手" loading="eager" decoding="async"></div>
+    <div class="dialog-mascot"><img id="saveTargetMascot" alt="System Assistant" loading="eager" decoding="async"></div>
     <div class="save-target-card" role="dialog" aria-modal="true" aria-labelledby="saveTargetTitle">
-      <div class="dialog-title-row"><div class="confirm-title" id="saveTargetTitle">选择保存位置</div></div>
+      <div class="dialog-title-row"><div class="confirm-title" id="saveTargetTitle">Choose Save Slot</div></div>
       <div class="save-target-summary" id="saveTargetSummary"></div>
-      <div class="save-target-head"><span>套装名称</span><span>状态</span><span>性别</span></div>
+      <div class="save-target-head"><span>Outfit Name</span><span>Status</span><span>Sex</span></div>
       <div class="save-target-list" id="saveTargetList"></div>
-      <div class="rename-shortcuts"><span>⌨ W/S 选择　A/D 翻页　E 保存　Tab 返回</span><span>🎮 ↑/↓ 选择　←/→ 翻页　A 保存　B 返回</span></div>
+      <div class="rename-shortcuts"><span>⌨ W/S Select　A/D Page　E Save　Tab Back</span><span>🎮 ↑/↓ Select　←/→ Page　A Save　B Back</span></div>
     </div>
   </div>
-  <div class="assistant-pop" id="assistantPop"><img id="assistantPopImage" alt="系统助手" loading="eager" decoding="async"></div>
-  <div class="top-assistant" id="topAssistant"><img id="topAssistantImage" alt="系统助手" loading="eager" decoding="async"><div class="top-assistant-bubble" id="topAssistantText"></div></div>
+  <div class="assistant-pop" id="assistantPop"><img id="assistantPopImage" alt="System Assistant" loading="eager" decoding="async"></div>
+  <div class="top-assistant" id="topAssistant"><img id="topAssistantImage" alt="System Assistant" loading="eager" decoding="async"><div class="top-assistant-bubble" id="topAssistantText"></div></div>
   <div class="closing-overlay" id="closingOverlay" aria-hidden="true">
     <div class="closing-card" role="status" aria-live="polite">
       <div class="closing-mascot"><img src="assets/mascot/halfbody/wait-1.png" alt="" loading="eager" decoding="async"></div>
-      <div class="closing-title">&#27491;&#22312;&#20445;&#23384;&#24403;&#21069;&#35774;&#32622;</div>
-      <div class="closing-copy">&#27491;&#22312;&#25972;&#29702;&#35282;&#33394;&#29366;&#24577;&#65292;&#35831;&#31245;&#20505;</div>
+      <div class="closing-title">Saving Current Settings</div>
+      <div class="closing-copy">Preparing character state, please wait</div>
       <div class="closing-progress" aria-hidden="true"><span></span></div>
     </div>
   </div>
@@ -1579,13 +1617,13 @@
     const PAGE_SIZE = 12;
     const SLOT_PAGE_SIZE = 12;
     const categories = [
-      ["all", "全部"], ["body", "身体"], ["legs", "腿部"], ["lower", "下装"],
-      ["feet", "鞋靴"], ["accessories", "配饰"], ["head", "头部"],
-      ["weapons", "武器"], ["other", "其他"]
+      ["all", "All"], ["body", "Body"], ["legs", "Legs"], ["lower", "Lower"],
+      ["feet", "Feet"], ["accessories", "Acc."], ["head", "Head"],
+      ["weapons", "Weapons"], ["other", "Other"]
     ];
 
     const state = {
-      slot: 1, previewSlot: 1, maxSlot: 500, targetName: "玩家", targetGender: 1,
+      slot: 1, previewSlot: 1, maxSlot: 500, targetName: "Player", targetGender: 1,
       targetId: "", targets: [], slotSummaries: {}, actualItems: [], actualClothingCount: 0, mode: "main", returnMode: "main",
       slotPage: 0, studioPage: 0, materialPage: 0, category: "all",
       studioItems: [], materials: [], selectedStudioToken: 0, selectedMaterialId: "",
@@ -1663,15 +1701,15 @@
 
     const esc = (value) => String(value ?? "").replace(/[&<>"']/g, ch => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[ch]));
     const pad = (value) => String(value || 0).padStart(3, "0");
-    const sexText = (value) => Number(value) === 0 ? "男" : Number(value) === 1 ? "女" : "未知";
-    const displayName = (value) => value === "Player" ? "玩家" : (value || "未知");
-    const categoryText = (key) => (categories.find(item => item[0] === key) || ["", "其他"])[1];
+    const sexText = (value) => Number(value) === 0 ? "M" : Number(value) === 1 ? "F" : "Unknown";
+    const displayName = (value) => value === "Player" ? "Player" : (value || "Unknown");
+    const categoryText = (key) => (categories.find(item => item[0] === key) || ["", "Other"])[1];
     const slotInfo = (slot) => state.slotSummaries[String(slot)] || { hasData: false, gender: -1, count: 0, items: [] };
-    const slotDisplayName = (slot, info = slotInfo(slot)) => info && info.name ? info.name : `套装 ${pad(slot)}`;
+    const slotDisplayName = (slot, info = slotInfo(slot)) => info && info.name ? info.name : `Outfit ${pad(slot)}`;
     const emptyState = (title, copy) => `<div class="empty empty-state"><div class="empty-state-figure"><img src="assets/mascot/halfbody/wait-2.png" alt="" loading="eager" decoding="async"></div><strong>${esc(title)}</strong><span>${esc(copy)}</span></div>`;
     const saveSlotLabel = (slot, info = slotInfo(slot)) => {
-      if (!info.hasData) return `套装 ${pad(slot)}（空）`;
-      return info.name ? `${info.name}（套装 ${pad(slot)}）` : `套装 ${pad(slot)}`;
+      if (!info.hasData) return `Outfit ${pad(slot)} (Empty)`;
+      return info.name ? `${info.name} (Outfit ${pad(slot)})` : `Outfit ${pad(slot)}`;
     };
 
     const mascotGroups = {
@@ -1824,11 +1862,11 @@
 
     function setConfirmCopy(text) {
       const raw = cleanTerminalStops(text);
-      const parts = raw.split(/(当前真实穿着|当前搭配[^\n]*|套装\s*\d{3}(?:（空）|\s*\(空\))?)/g);
+      const parts = raw.split(/(Actual Outfit|Current Outfit[^\n]*|Outfit\s*\d{3}(?:\s*\(Empty\))?)/g);
       confirmCopy.innerHTML = parts.map(part => {
-        if (part === "当前真实穿着") return `<span class="keyword-actual">${part}</span>`;
-        if (part.startsWith("当前搭配")) return `<span class="current-outfit">${esc(part)}</span>`;
-        if (/^套装\s*\d{3}/.test(part)) return `<span class="slot-target">${esc(part)}</span>`;
+        if (part === "Actual Outfit") return `<span class="keyword-actual">${part}</span>`;
+        if (part.startsWith("Current Outfit")) return `<span class="current-outfit">${esc(part)}</span>`;
+        if (/^Outfit\s*\d{3}/.test(part)) return `<span class="slot-target">${esc(part)}</span>`;
         return esc(part);
       }).join("");
     }
@@ -1855,29 +1893,29 @@
 
     function setFooter(mode) {
       const s = (key, label, tone = "", keyClass = "") => `<span class="shortcut ${tone}"><span class="key ${keyClass}"${keyClass ? ` aria-label="${label}"` : ""}>${key}</span>${label}</span>`;
-      const group = (device, keys) => `<div class="help"><div class="help-device">${device === "键盘" ? "⌨ 键盘" : "🎮 手柄"}</div><div class="help-keys">${keys}</div></div>`;
-      let keyboard = `${s("W/S", "选择")}${s("E", "确认", "primary")}${s("Tab", "返回")}`;
-      let gamepad = `${s("↑/↓", "选择")}${s("A", "确认", "primary")}${s("B", "返回")}`;
+      const group = (device, keys) => `<div class="help"><div class="help-device">${device === "Keyboard" ? "⌨ Keyboard" : "🎮 Gamepad"}</div><div class="help-keys">${keys}</div></div>`;
+      let keyboard = `${s("W/S", "Select")}${s("E", "Confirm", "primary")}${s("Tab", "Back")}`;
+      let gamepad = `${s("↑/↓", "Select")}${s("A", "Confirm", "primary")}${s("B", "Back")}`;
       if (mode === "slots") {
-        keyboard = `${s("W/S", "浏览")}${s("A/D", "翻页")}${s("I/K", "详情")}${s("E", "试穿", "primary")}${s("R", "保存当前穿着")}${s("Q", "命名")}${s("F", "清空")}${s("Tab", "返回")}`;
-        gamepad = `${s("↑/↓", "浏览")}${s("←/→", "翻页")}${s("A", "试穿", "primary")}${s("", "保存当前穿着", "", "gamepad-menu-key")}${s("X", "命名")}${s("Y", "清空")}${s("B", "返回")}`;
+        keyboard = `${s("W/S", "Browse")}${s("A/D", "Page")}${s("I/K", "Details")}${s("E", "Preview", "primary")}${s("R", "Save")}${s("Q", "Rename")}${s("F", "Clear")}${s("Tab", "Back")}`;
+        gamepad = `${s("↑/↓", "Browse")}${s("←/→", "Page")}${s("A", "Preview", "primary")}${s("", "Save", "", "gamepad-menu-key")}${s("X", "Rename")}${s("Y", "Clear")}${s("B", "Back")}`;
       } else if (mode === "studio") {
-        keyboard = `${s("W/S", "选择")}${s("A/D", "翻页")}${s("Z/C", "分类")}${s("E", "穿上/脱下", "primary")}${s("F", "材质")}${s("R", "保存套装")}${s("Tab", "返回")}`;
-        gamepad = `${s("↑/↓", "选择")}${s("←/→", "翻页")}${s("A", "穿上/脱下", "primary")}${s("Y", "材质")}${s("", "保存套装", "", "gamepad-menu-key")}${s("LB/RB", "分类")}${s("B", "返回")}`;
+        keyboard = `${s("W/S", "Select")}${s("A/D", "Page")}${s("Z/C", "Category")}${s("E", "Equip")}${s("F", "Material")}${s("R", "Save")}${s("Tab", "Back")}`;
+        gamepad = `${s("↑/↓", "Select")}${s("←/→", "Page")}${s("A", "Equip")}${s("Y", "Material")}${s("", "Save", "", "gamepad-menu-key")}${s("LB/RB", "Category")}${s("B", "Back")}`;
       } else if (mode === "materials") {
-        keyboard = `${s("W/S", "选择")}${s("A/D", "翻页")}${s("E", "试穿材质", "primary")}${s("F", "生成物品", "special")}${s("Tab", "返回")}`;
-        gamepad = `${s("↑/↓", "选择")}${s("←/→", "翻页")}${s("A", "试穿材质", "primary")}${s("Y", "生成物品", "special")}${s("LB/RB", "翻页")}${s("B", "返回")}`;
+        keyboard = `${s("W/S", "Select")}${s("A/D", "Page")}${s("E", "Preview", "primary")}${s("F", "Generate", "special")}${s("Tab", "Back")}`;
+        gamepad = `${s("↑/↓", "Select")}${s("←/→", "Page")}${s("A", "Preview", "primary")}${s("Y", "Generate", "special")}${s("LB/RB", "Page")}${s("B", "Back")}`;
       } else if (mode === "main") {
-        keyboard = `${s("W/S", "选择")}${s("E", "执行", "primary")}${s("F", "随机试穿")}${s("Q", "管理套装")}${s("R", "恢复默认服装")}${s("Tab", "关闭")}`;
-        gamepad = `${s("↑/↓", "选择")}${s("A", "执行", "primary")}${s("Y", "随机试穿")}${s("X", "管理套装")}${s("LB", "恢复默认服装")}${s("B", "关闭")}`;
+        keyboard = `${s("W/S", "Select")}${s("E", "Use", "primary")}${s("F", "Random")}${s("Q", "Outfits")}${s("R", "Restore")}${s("Tab", "Close")}`;
+        gamepad = `${s("↑/↓", "Select")}${s("A", "Use", "primary")}${s("Y", "Random")}${s("X", "Outfits")}${s("LB", "Restore")}${s("B", "Close")}`;
       }
       if (mode === "main" || mode === "targets") {
-        keyboard += s("J/L", "旋转人物");
-        gamepad += s("LT/RT", "旋转人物");
+        keyboard += s("J/L", "Rotate");
+        gamepad += s("LT/RT", "Rotate");
       }
       const keyboardMode = state.inputMode !== "gamepad";
-      footer.innerHTML = group(keyboardMode ? "键盘" : "手柄", keyboardMode ? keyboard : gamepad);
-      document.getElementById("inputBadge").textContent = keyboardMode ? "键盘" : "手柄";
+      footer.innerHTML = group(keyboardMode ? "Keyboard" : "Gamepad", keyboardMode ? keyboard : gamepad);
+      document.getElementById("inputBadge").textContent = keyboardMode ? "Keyboard" : "Gamepad";
     }
 
     function setInputMode(mode) {
@@ -1976,17 +2014,17 @@
     function updateActionHint(el) {
       const hint = document.getElementById("actionHint");
       const hints = {
-        confirm: ["", "确认穿戴：将右侧正在试穿的套装正式装备到角色身上。"],
-        random: ["F", "随机试穿：从适合当前角色的已保存套装中抽取一套。"],
-        studio: ["", "服装工作台：从角色的当前真实穿着开始搭配，可逐件试穿并调整材质。"],
-        targets: ["", "选择目标：切换玩家或附近 NPC。NPC 预览受距离和朝向影响；画面不正常时，请靠近 NPC 并正对 NPC 后重新选择，效果最佳。"],
-        slots: ["Q", "管理套装：浏览、试穿、保存当前穿着、命名或清空套装。"],
-        more: ["", "更多功能：进入恢复默认等低频操作。"],
-        reset: ["", "恢复默认服装：移除本模组管理的衣物，恢复目标的默认服装。"],
-        backMain: ["Tab", "返回服装管理主页面。"],
-        close: ["Tab", state.hasPendingPreview ? "关闭前会询问是否确认穿戴当前试穿。" : "关闭菜单并返回游戏。"]
+        confirm: ["", "Confirm Outfit: equip the outfit currently being previewed."],
+        random: ["F", "Random Preview: choose a saved outfit that matches the current character."],
+        studio: ["", "Outfit Studio: start from the actual outfit, preview individual items, and adjust materials."],
+        targets: ["", "Select Target: switch between the player and nearby NPCs. For a reliable preview, move close and face the NPC before selecting them."],
+        slots: ["Q", "Manage Outfits: browse, preview, save, rename, or clear outfits."],
+        more: ["", "More Actions: access less frequently used actions."],
+        reset: ["", "Restore Default Outfit: remove managed items and restore the target's default outfit."],
+        backMain: ["Tab", "Return to the main outfit management page."],
+        close: ["Tab", state.hasPendingPreview ? "You will be asked whether to equip the current preview before closing." : "Close the menu and return to the game."]
       };
-      const value = el && el.dataset && hints[el.dataset.act] ? hints[el.dataset.act] : ["", "想要做什么呢？请选择一项功能开始。"]; 
+      const value = el && el.dataset && hints[el.dataset.act] ? hints[el.dataset.act] : ["", "What would you like to do? Choose an action to begin."];
       const bubble = document.getElementById("homeActionBubble");
       if (bubble) bubble.textContent = cleanTerminalStops(value[1]);
       const homeImage = document.getElementById("homeMascotImage");
@@ -2033,12 +2071,12 @@
         nativeCall("onOutfitManagerRollbackPreview", {});
         render();
         if (state.mode === "slots") paintSlotDetail(slot);
-        setStage("人物显示：当前真实穿着");
-        showToast("该套装为空", true, "warning");
+        setStage("Character: Actual Outfit");
+        showToast("This outfit is empty", true, "warning");
         return;
       }
       if (Number(info.gender) >= 0 && Number(info.gender) !== Number(state.targetGender)) {
-        showToast("套装性别不匹配", true, "warning");
+        showToast("Outfit Does Not Match Target", true, "warning");
         return;
       }
       previewTimer = setTimeout(() => nativeCall("onOutfitManagerPreviewSlot", {
@@ -2062,32 +2100,32 @@
     }
 
     function renderMain() {
-      setHeader("青空的服装管理系统", "服装管理 / 当前角色");
+      setHeader("Aozora Outfit System", "Outfit Management / Current Character");
       setFooter("main");
       const booting = state.booting;
-      const sourceText = state.previewSource === "random" ? `随机试穿 · 套装 ${pad(state.previewSlot)}`
-        : state.previewSource === "saved" ? `试穿套装 ${pad(state.previewSlot)}`
-        : state.previewSource === "studio" ? "工作台编辑搭配"
-        : state.previewSource === "default" ? "默认服装"
-        : "当前真实穿着";
+      const sourceText = state.previewSource === "random" ? `Random Preview · Outfit ${pad(state.previewSlot)}`
+        : state.previewSource === "saved" ? `Preview Outfit ${pad(state.previewSlot)}`
+        : state.previewSource === "studio" ? "Studio Draft"
+        : state.previewSource === "default" ? "Default Outfit"
+        : "Actual Outfit";
       content.innerHTML = `
         <div class="main-grid home-grid">
           <div class="column">
-            <div class="section-head"><strong>你想做什么？</strong></div>
+            <div class="section-head"><strong>What would you like to do?</strong></div>
             <div class="action-list scroll">
-              ${mainButton("confirm", "确认穿戴", "", "", "primary", !state.hasPendingPreview)}
-              ${mainButton("random", "随机试穿", "F", "Y")}
-              ${mainButton("slots", "管理套装", "Q", "X")}
-              ${mainButton("targets", "选择目标", "")}
-              ${mainButton("studio", "服装工作台", "")}
-              ${mainButton("reset", "恢复默认服装", "R", "LB")}
-              ${mainButton("close", "关闭", "Tab", "B")}
+              ${mainButton("confirm", "Confirm Outfit", "", "", "primary", !state.hasPendingPreview)}
+              ${mainButton("random", "Random Preview", "F", "Y")}
+              ${mainButton("slots", "Manage Outfits", "Q", "X")}
+              ${mainButton("targets", "Select Target", "")}
+              ${mainButton("studio", "Outfit Studio", "")}
+              ${mainButton("reset", "Restore Default Outfit", "R", "LB")}
+              ${mainButton("close", "Close", "Tab", "B")}
             </div>
           </div>
           <div class="home-assistant">
-            <div class="home-bubble" id="homeActionBubble">${booting ? "首次启动资源加载中" : "请选择一项功能开始。"}</div>
+            <div class="home-bubble" id="homeActionBubble">${booting ? "Loading resources for the first launch" : "Choose an action to begin."}</div>
             <div class="home-mascot-wrap">
-              <img class="home-mascot" id="homeMascotImage" alt="辐射娘助手" loading="eager" decoding="async">
+              <img class="home-mascot" id="homeMascotImage" alt="Assistant" loading="eager" decoding="async">
             </div>
           </div>
         </div>`;
@@ -2101,11 +2139,11 @@
     }
 
     function renderMore() {
-      setHeader("更多功能", "服装管理 / 低频操作");
+      setHeader("More Actions", "Outfit Management / More Actions");
       setFooter("more");
-      content.innerHTML = `<div class="page-layout"><div class="section-head"><strong>角色服装维护</strong></div><div class="page-list list">
-        ${mainButton("reset", "恢复角色默认服装", "", "", "primary")}
-        ${mainButton("backMain", "返回主页面", "Tab", "B")}
+      content.innerHTML = `<div class="page-layout"><div class="section-head"><strong>Character Outfit Maintenance</strong></div><div class="page-list list">
+        ${mainButton("reset", "Restore Character Default", "", "", "primary")}
+        ${mainButton("backMain", "Return to Main Page", "Tab", "B")}
       </div></div>`;
       bindFocus();
     }
@@ -2117,17 +2155,17 @@
       const items = Array.isArray(info.items) ? info.items : [];
       const itemHtml = items.length
         ? items.map(item => `<div class="outfit-item" title="${esc(item)}"><span class="outfit-item-name">${esc(item)}</span></div>`).join("")
-        : emptyState("这里还没有保存套装", "穿好喜欢的搭配后，可以把它保存到这个槽位");
+        : emptyState("No outfits saved here yet", "Dress the character, then save the look to this slot");
       pane.innerHTML = `
         <div class="slot-summary">
           <div class="slot-number">${pad(slot)}</div>
           <div>
             <div class="slot-title">${esc(slotDisplayName(slot, info))}</div>
-            <div class="slot-meta">状态：<b>${info.hasData ? "已保存" : "空套装"}</b>　性别：<b>${info.hasData ? sexText(info.gender) : "-"}</b>　物品：<b>${items.length}</b></div>
+            <div class="slot-meta">Status: <b>${info.hasData ? "Saved" : "Empty"}</b>　Sex: <b>${info.hasData ? sexText(info.gender) : "-"}</b>　Items: <b>${items.length}</b></div>
           </div>
         </div>
         <div class="outfit-block">
-          <div class="section-head"><strong>套装内容</strong><span>${items.length} 件</span></div>
+          <div class="section-head"><strong>Outfit Contents</strong><span>${items.length} items</span></div>
           <div class="outfit-items scroll">${itemHtml}</div>
         </div>`;
     }
@@ -2139,7 +2177,7 @@
     }
 
     function renderSlots() {
-      setHeader("管理套装", "服装管理 / 已保存套装");
+      setHeader("Manage Outfits", "Outfit Management / Saved Outfits");
       setFooter("slots");
       const maxPage = Math.max(0, Math.ceil(state.maxSlot / SLOT_PAGE_SIZE) - 1);
       state.slotPage = Math.max(0, Math.min(maxPage, state.slotPage));
@@ -2147,22 +2185,22 @@
       const rows = [];
       for (let slot = start; slot < start + SLOT_PAGE_SIZE && slot <= state.maxSlot; slot++) {
         const info = slotInfo(slot);
-        rows.push(`<button class="list-row slot-row focusable ${info.hasData ? "saved" : ""}" data-act="chooseSlot" data-slot="${slot}"><span class="row-title">${info.hasData ? esc(slotDisplayName(slot, info)) : `套装 ${pad(slot)} · 空`}</span><span class="row-meta">${info.hasData ? sexText(info.gender) + " · " + info.count + " 件" : ""}</span></button>`);
+        rows.push(`<button class="list-row slot-row focusable ${info.hasData ? "saved" : ""}" data-act="chooseSlot" data-slot="${slot}"><span class="row-title">${info.hasData ? esc(slotDisplayName(slot, info)) : `Outfit ${pad(slot)} · Empty`}</span><span class="row-meta">${info.hasData ? sexText(info.gender) + " · " + info.count + " items" : ""}</span></button>`);
       }
-      content.innerHTML = `<div class="slot-browser"><div class="slot-list-pane"><div class="section-head"><strong>套装 ${start} - ${Math.min(state.maxSlot, start + SLOT_PAGE_SIZE - 1)}</strong><span>${state.slotPage + 1} / ${maxPage + 1} 页</span></div><div class="page-list list scroll">${rows.join("")}</div></div><div class="slot-detail-pane"><div class="slot-detail-card" id="slotDetail"></div></div></div>`;
+      content.innerHTML = `<div class="slot-browser"><div class="slot-list-pane"><div class="section-head"><strong>Outfit ${start} - ${Math.min(state.maxSlot, start + SLOT_PAGE_SIZE - 1)}</strong><span>Page ${state.slotPage + 1} / ${maxPage + 1}</span></div><div class="page-list list scroll">${rows.join("")}</div></div><div class="slot-detail-pane"><div class="slot-detail-card" id="slotDetail"></div></div></div>`;
       bindFocus(Math.max(0, Math.min(SLOT_PAGE_SIZE - 1, state.previewSlot - start)));
       paintSlotDetail(state.previewSlot);
     }
 
     function renderTargets() {
-      setHeader("选择目标", "套装管理 / 附近角色");
+      setHeader("Select Target", "Outfit Management / Nearby Characters");
       setFooter("targets");
       const rows = (state.targets || []).map((target, index) => {
         const player = !!target.player;
-        const distance = player ? "" : ` · 距离 ${Math.round(Number(target.distance || 0))}`;
+        const distance = player ? "" : ` · Distance ${Math.round(Number(target.distance || 0))}`;
         return `<button class="list-row focusable ${player ? "player" : "npc"}" data-act="chooseTarget" data-id="${esc(target.id)}" data-index="${index}"><span class="row-title">${index + 1}. ${esc(displayName(target.name))}${distance}</span><span class="row-meta">${sexText(target.sex)}</span></button>`;
       }).join("");
-      content.innerHTML = `<div class="page-layout targets-layout"><div class="section-head"><strong>玩家与附近 NPC</strong><span>${state.targets.length} 个目标</span></div><div class="page-list list scroll">${rows || emptyState("附近没有可选择的角色", "靠近一名 NPC 后再回来看看")}</div><div class="target-guide"><div class="target-guide-art"><img src="assets/mascot/targets/target-guide.png" alt=""></div><div class="target-guide-copy"><strong>选择附近目标</strong>挑选离你比较近的目标，试衣服效果才会好哦。</div></div></div>`;
+      content.innerHTML = `<div class="page-layout targets-layout"><div class="section-head"><strong>Player and Nearby NPCs</strong><span>${state.targets.length} targets</span></div><div class="page-list list scroll">${rows || emptyState("No eligible characters nearby", "Move closer to an NPC and try again")}</div><div class="target-guide"><div class="target-guide-art"><img src="assets/mascot/targets/target-guide.png" alt=""></div><div class="target-guide-copy"><strong>Select a Nearby Target</strong>Choose a nearby target for the most reliable preview.</div></div></div>`;
       bindFocus(Math.max(0, state.targets.findIndex(target => target.id === state.targetId)));
     }
 
@@ -2180,16 +2218,16 @@
       const mods = document.getElementById("studioDetailMods");
       const status = document.getElementById("studioDetailStatus");
       if (!title || !category || !count || !mods || !status) return;
-      title.textContent = item ? item.name : "选择一件服装";
+      title.textContent = item ? item.name : "Select a Clothing Item";
       category.textContent = item ? categoryText(item.category) : "";
-      count.textContent = item ? `数量 x${Number(item.count || 1)}` : "可试穿装备或进入材质交换";
-      mods.textContent = item ? `改装 ${Number(item.modCount || 0)}` : "";
-      status.textContent = item ? (item.equipped ? "当前已穿戴" : "当前未穿戴") : "";
+      count.textContent = item ? `Count x${Number(item.count || 1)}` : "Preview the item or open Material Swap";
+      mods.textContent = item ? `Mods ${Number(item.modCount || 0)}` : "";
+      status.textContent = item ? (item.equipped ? "Equipped" : "Not Equipped") : "";
       status.className = item && item.equipped ? "equipped-label" : "";
     }
 
     function renderStudio() {
-      setHeader("服装工作台", `目标：${displayName(state.targetName)} / 当前套装 ${pad(state.slot)}`);
+      setHeader("Outfit Studio", `Target: ${displayName(state.targetName)} / Active Outfit ${pad(state.slot)}`);
       setFooter("studio");
       const filtered = filteredStudioItems();
       const maxPage = Math.max(0, Math.ceil(filtered.length / PAGE_SIZE) - 1);
@@ -2198,11 +2236,11 @@
       const categoryHtml = categories.map(([key, label]) => `<button class="category-button ${state.category === key ? "active" : ""}" data-category="${key}"><span>${label}</span></button>`).join("");
       const weaponsDisabled = state.category === "weapons" && !state.weaponsEnabled;
       const itemHtml = weaponsDisabled
-        ? emptyState("武器保存尚未开启", "在 MCM 菜单中开启“保存武器”后，再进入工作台加载武器")
+        ? emptyState("Weapon saving is disabled", "Enable Save Weapons in MCM, then reopen the studio to load weapons")
         : state.loadingStudio
-        ? `<div class="material-loading-card"><img class="material-loading-mascot" src="${mascotPath("waiting")}" alt="" loading="eager" decoding="async"><div class="material-loading-copy"><strong>正在整理可用于搭配的服装</strong><span>物品较多时需要一点时间，请稍等一下哦。</span></div></div>`
-        : pageItems.length ? pageItems.map(item => `<button class="list-row focusable ${Number(item.token) === Number(state.selectedStudioToken) ? "saved" : ""}" data-act="studioItem" data-token="${item.token}" data-equipped="${item.equipped ? "1" : "0"}"><span class="row-title">${esc(item.name)}</span><span class="row-meta"><span class="inventory-count">x${Number(item.count || 1)}</span>　<span class="mod-count">改装 ${Number(item.modCount || 0)}</span>　<span class="${item.equipped ? "equipped-label" : "not-equipped-label"}">${item.equipped ? "已穿戴" : "未穿戴"}</span></span></button>`).join("") : emptyState("这个分类里没有服装", "换个分类看看，或者先把服装放进角色背包");
-      content.innerHTML = `<div class="studio-grid"><div class="category-wrap"><div class="category-list">${categoryHtml}</div><div class="category-meta">${filtered.length} 件 · ${state.studioPage + 1}/${maxPage + 1} 页</div></div><div class="studio-main"><div class="studio-list list scroll">${itemHtml}</div><div class="detail-band" id="studioDetail"><div class="detail-title" id="studioDetailTitle"></div><div class="detail-meta"><span class="tag" id="studioDetailCategory"></span><span class="inventory-count" id="studioDetailCount"></span><span class="mod-count" id="studioDetailMods"></span><span id="studioDetailStatus"></span></div></div></div></div>`;
+        ? `<div class="material-loading-card"><img class="material-loading-mascot" src="${mascotPath("waiting")}" alt="" loading="eager" decoding="async"><div class="material-loading-copy"><strong>Preparing clothing for the studio</strong><span>Large inventories can take a moment. Please wait.</span></div></div>`
+        : pageItems.length ? pageItems.map(item => `<button class="list-row focusable ${Number(item.token) === Number(state.selectedStudioToken) ? "saved" : ""}" data-act="studioItem" data-token="${item.token}" data-equipped="${item.equipped ? "1" : "0"}"><span class="row-title">${esc(item.name)}</span><span class="row-meta"><span class="inventory-count">x${Number(item.count || 1)}</span>　<span class="mod-count">Mods ${Number(item.modCount || 0)}</span>　<span class="${item.equipped ? "equipped-label" : "not-equipped-label"}">${item.equipped ? "Equipped" : "Not Equipped"}</span></span></button>`).join("") : emptyState("No clothing in this category", "Try another category or add clothing to the character's inventory");
+       content.innerHTML = `<div class="studio-grid"><div class="category-wrap"><div class="category-list">${categoryHtml}</div><div class="category-meta">${filtered.length} items · ${state.studioPage + 1}/${maxPage + 1}</div></div><div class="studio-main"><div class="studio-list list scroll">${itemHtml}</div><div class="detail-band" id="studioDetail"><div class="detail-title" id="studioDetailTitle"></div><div class="detail-meta"><span class="tag" id="studioDetailCategory"></span><span class="inventory-count" id="studioDetailCount"></span><span class="mod-count" id="studioDetailMods"></span><span id="studioDetailStatus"></span></div></div></div></div>`;
       content.querySelectorAll(".category-button").forEach(button => button.addEventListener("click", () => {
         setInputMode("keyboard");
         state.category = button.dataset.category || "all";
@@ -2216,13 +2254,13 @@
     }
 
     function renderMaterials() {
-      setHeader("材质交换", `服装工作台 / ${state.materialItemName || "选择材质"}`);
+      setHeader("Material Swap", `Outfit Studio / ${state.materialItemName || "Select Material"}`);
       setFooter("materials");
       const maxPage = Math.max(0, Math.ceil(state.materials.length / PAGE_SIZE) - 1);
       state.materialPage = Math.max(0, Math.min(maxPage, state.materialPage));
-      const rows = state.materials.slice(state.materialPage * PAGE_SIZE, (state.materialPage + 1) * PAGE_SIZE).map(choice => `<button class="list-row focusable ${choice.current ? "saved" : ""}" data-act="materialItem" data-id="${esc(choice.id)}"><span class="row-title">${esc(choice.name)}</span><span class="row-meta">${choice.current ? "当前材质" : choice.fallback ? "扩展匹配" : ""}</span></button>`).join("");
-      const loadingPanel = `<div class="material-loading-card"><img class="material-loading-mascot" src="${mascotPath("waiting")}" alt="" loading="eager" decoding="async"><div class="material-loading-copy"><strong>正在整理这件服装的可用材质</strong><span>第一次读取可能稍慢，请稍等一下哦。</span></div></div>`;
-      content.innerHTML = `<div class="page-layout"><div class="section-head"><strong>可用材质</strong><span>${state.loadingMaterials ? "读取中" : state.materials.length + " 项 · " + (state.materialPage + 1) + "/" + (maxPage + 1) + " 页"}</span></div><div class="page-list list scroll">${state.loadingMaterials ? loadingPanel : rows || emptyState("这件服装没有材质交换", "它仍然可以作为基础款正常试穿和保存")}</div><div class="detail-band"><div class="detail-title">${esc(state.materialItemName || "材质试穿")}</div><div class="detail-meta"><span>试穿不会写入背包</span><span>生成后会作为永久命名物品加入玩家背包</span></div></div></div>`;
+      const rows = state.materials.slice(state.materialPage * PAGE_SIZE, (state.materialPage + 1) * PAGE_SIZE).map(choice => `<button class="list-row focusable ${choice.current ? "saved" : ""}" data-act="materialItem" data-id="${esc(choice.id)}"><span class="row-title">${esc(choice.name)}</span><span class="row-meta">${choice.current ? "Current Material" : choice.fallback ? "Extended Match" : ""}</span></button>`).join("");
+      const loadingPanel = `<div class="material-loading-card"><img class="material-loading-mascot" src="${mascotPath("waiting")}" alt="" loading="eager" decoding="async"><div class="material-loading-copy"><strong>Preparing available materials</strong><span>The first scan may take a moment. Please wait.</span></div></div>`;
+      content.innerHTML = `<div class="page-layout"><div class="section-head"><strong>Available Materials</strong><span>${state.loadingMaterials ? "Loading" : state.materials.length + " options · Page " + (state.materialPage + 1) + "/" + (maxPage + 1)}</span></div><div class="page-list list scroll">${state.loadingMaterials ? loadingPanel : rows || emptyState("This item has no material swaps", "It can still be previewed and saved as the base item")}</div><div class="detail-band"><div class="detail-title">${esc(state.materialItemName || "Material Preview")}</div><div class="detail-meta"><span>Previewing does not modify inventory</span><span>Generated variants are added to the player's inventory as permanent named items</span></div></div></div>`;
       bindFocus();
     }
 
@@ -2235,7 +2273,7 @@
       else if (state.mode === "materials") renderMaterials();
       else if (state.mode === "more") renderMore();
       else renderMain();
-      setStage(document.getElementById("stageStatus").textContent || "等待试穿");
+      setStage(document.getElementById("stageStatus").textContent || "Ready to Preview");
     }
 
     function mergeStudioItems(incoming) {
@@ -2280,9 +2318,9 @@
     }
 
     function openStudioEntryConfirm() {
-      openConfirm({ type: "studioEntry", kind: "question", title: "进入服装工作台",
-        copy: "工作台会从角色的当前真实穿着开始搭配。\n\n编辑期间，如果脱下不带内衣的服装，画面可能出现裸露内容。是否进入服装工作台？\n\n可在 MCM「提示与确认」中关闭此提示。",
-        ok: "进入工作台", alt: "", cancel: "先不进去" });
+      openConfirm({ type: "studioEntry", kind: "question", title: "Enter Outfit Studio",
+        copy: "The studio starts from the character's actual outfit.\n\nRemoving clothing without built-in underwear may reveal nudity while editing. Enter the Outfit Studio?\n\nThis warning can be disabled under Prompts & Confirmations in MCM.",
+        ok: "Enter Studio", alt: "", cancel: "Not Now" });
     }
 
     function restoreBeforeStudio() {
@@ -2314,10 +2352,10 @@
     }
 
     function openMaterials() {
-      if (!state.selectedStudioToken) return showToast("请先选择一件服装");
+      if (!state.selectedStudioToken) return showToast("Select a clothing item first");
       const selected = state.studioItems.find(item => Number(item.token) === Number(state.selectedStudioToken));
-      if (selected && !selected.equipped) return showToast("请先穿上再调材质", true, "warning");
-      if (selected && selected.weapon) return showToast("武器会保留当前改装；材质交换仅适用于服装");
+      if (selected && !selected.equipped) return showToast("Equip the item before changing its material", true, "warning");
+      if (selected && selected.weapon) return showToast("Weapons keep their current modifications; material swaps apply only to clothing");
       state.footerMessage = "";
       state.mode = "materials";
       state.loadingMaterials = true;
@@ -2359,13 +2397,13 @@
       state.confirming = true;
       state.pendingConfirm = options;
       state.confirmFocus = options.defaultFocus === "ok" ? 2 : 0;
-      document.getElementById("confirmTitle").textContent = options.title || "请确认";
+      document.getElementById("confirmTitle").textContent = options.title || "Please Confirm";
       setConfirmCopy(options.copy || "");
-      document.getElementById("confirmOk").textContent = options.ok || "确认";
+      document.getElementById("confirmOk").textContent = options.ok || "Confirm";
       document.getElementById("confirmOk").hidden = !!options.hideOk;
-      document.getElementById("confirmAlt").textContent = options.alt || "取消";
+      document.getElementById("confirmAlt").textContent = options.alt || "Cancel";
       document.getElementById("confirmAlt").hidden = !options.alt;
-      document.getElementById("confirmCancel").textContent = options.cancel || "返回";
+      document.getElementById("confirmCancel").textContent = options.cancel || "Back";
       setDialogMascot("confirmMascot", options.kind || "question");
       confirmDialog.dataset.kind = options.kind || "question";
       confirmDialog.classList.add("open");
@@ -2384,9 +2422,9 @@
       }
       openConfirm({
         type: "saveActual", source, slot, kind: info.hasData ? "warning" : "question",
-        title: "保存当前穿着",
-        copy: info.hasData ? `${target} 已有内容，是否用角色的当前真实穿着覆盖？` : `是否将角色的当前真实穿着保存至 ${target}？`,
-        ok: info.hasData ? "覆盖保存" : "保存", alt: "", cancel: "取消"
+        title: "Save Current Outfit",
+        copy: info.hasData ? `${target} already contains an outfit. Overwrite it with the character's Actual Outfit?` : `Save the character's Actual Outfit to ${target}?`,
+        ok: info.hasData ? "Overwrite" : "Save", alt: "", cancel: "Cancel"
       });
     }
 
@@ -2395,56 +2433,56 @@
       const slot = state.quickSaveSlot;
       const info = slotInfo(slot);
       const targetName = displayName(state.targetName);
-      const targetSex = Number(state.targetGender) === 0 ? "男性" : Number(state.targetGender) === 1 ? "女性" : "性别未知";
+      const targetSex = Number(state.targetGender) === 0 ? "Male" : Number(state.targetGender) === 1 ? "Female" : "Unknown sex";
       const itemCount = Number(state.actualClothingCount || 0);
       const outfitName = slotDisplayName(slot, info);
       if (itemCount <= 0) {
         openConfirm({
-          type: "quickSaveNoItems", kind: "warning", title: "好像没什么可以保存",
-          copy: `我没有在「${targetName}」身上找到可以保存的服装\n给角色穿好以后再试一次吧`,
-          hideOk: true, alt: "", cancel: "知道了"
+          type: "quickSaveNoItems", kind: "warning", title: "Nothing to Save",
+          copy: `I could not find any clothing to save on "${targetName}"\nDress the character and try again`,
+          hideOk: true, alt: "", cancel: "Got It"
         });
         return;
       }
       openConfirm({
         type: "quickSave", slot, kind: info.hasData ? "warning" : "save",
-        title: info.hasData ? "要更新这套搭配吗？" : "要把这身保存下来吗？",
+        title: info.hasData ? "Update This Outfit?" : "Save This Outfit?",
         copy: info.hasData
-          ? `要把「${targetName}」现在穿的这身\n保存到「${outfitName}」吗？\n\n这里已经保存过一套搭配\n继续保存会替换原来的内容\n\n当前搭配 ${outfitName} ${targetSex}·${itemCount}件服装`
-          : `「${outfitName}」现在还是空的\n\n要把「${targetName}」现在穿的这身\n保存到这里吗？\n之后还可以给它取一个喜欢的名字\n\n当前搭配 ${outfitName} ${targetSex}·${itemCount}件服装`,
-        ok: info.hasData ? "覆盖保存" : "保存下来", alt: "", cancel: "再看看", defaultFocus: "ok"
+          ? `Save what "${targetName}" is wearing to "${outfitName}"?\n\nThis slot already contains an outfit\nSaving will replace its current contents\n\nCurrent Outfit ${outfitName} · ${targetSex} · ${itemCount} items`
+          : `"${outfitName}" is currently empty\n\nSave what "${targetName}" is wearing here?\nYou can give it a custom name later\n\nCurrent Outfit ${outfitName} · ${targetSex} · ${itemCount} items`,
+        ok: info.hasData ? "Overwrite" : "Save It", alt: "", cancel: "Not Yet", defaultFocus: "ok"
       });
     }
 
     function openMainExitConfirm() {
-      openConfirm({ type: "mainExit", kind: "question", title: "退出服装管理",
-        copy: "当前试穿与角色的当前真实穿着不同，要确认穿戴这身套装再退出吗？",
-        ok: "确认穿戴并退出", alt: "不穿戴并退出", cancel: "继续查看" });
+      openConfirm({ type: "mainExit", kind: "question", title: "Close Outfit Management",
+        copy: "The preview differs from the character's actual outfit. Equip it before closing?",
+        ok: "Equip and Exit", alt: "Exit Without Equipping", cancel: "Keep Browsing" });
     }
 
     function openStudioExitConfirm() {
-      openConfirm({ type: "studioExit", kind: "question", title: "保存编辑搭配",
-        copy: "当前编辑搭配发生了变化，要怎么处理呢？",
-        ok: "选择位置保存", alt: "不保存", cancel: "继续编辑" });
+      openConfirm({ type: "studioExit", kind: "question", title: "Save Studio Draft",
+        copy: "The studio draft has changed. What should happen next?",
+        ok: "Choose Save Slot", alt: "Don't Save", cancel: "Keep Editing" });
     }
 
     function openMaterialExitConfirm() {
-      openConfirm({ type: "materialExit", kind: "question", title: "材质尚未生成",
-        copy: "当前材质只是临时试穿，要生成物品后保留吗？",
-        ok: "生成物品", alt: "放弃预览", cancel: "继续调整" });
+      openConfirm({ type: "materialExit", kind: "question", title: "Material Not Generated",
+        copy: "This material is only a preview. Generate a permanent item?",
+        ok: "Generate Item", alt: "Discard Preview", cancel: "Keep Editing" });
     }
 
     function openClearConfirm() {
       const slot = state.previewSlot;
       const info = slotInfo(slot);
-      if (!info.hasData) return showToast("该套装已经是空的", true, "warning");
+      if (!info.hasData) return showToast("This outfit is already empty", true, "warning");
       if (!state.settings.confirmClearSavedOutfit) {
         nativeCall("onOutfitManagerClearSlot", { slot });
         return;
       }
-      openConfirm({ type: "clearSlot", slot, kind: "warning", title: "清空保存套装",
-        copy: `是否清空 ${saveSlotLabel(slot, info)}？此操作会删除其中保存的套装数据。`,
-        ok: "清空", alt: "", cancel: "取消" });
+      openConfirm({ type: "clearSlot", slot, kind: "warning", title: "Clear Saved Outfit",
+        copy: `Clear ${saveSlotLabel(slot, info)}? This deletes the saved outfit data in this slot.`,
+        ok: "Clear", alt: "", cancel: "Cancel" });
     }
 
     function openResetConfirm() {
@@ -2452,9 +2490,9 @@
         nativeCall("onOutfitManagerPreviewDefaultOutfit", { slot: state.slot });
         return;
       }
-      openConfirm({ type: "resetDefault", kind: "warning", title: "恢复默认服装",
-        copy: "是否移除本模组管理的衣物，并恢复角色默认状态？",
-        ok: "恢复默认服装", alt: "", cancel: "取消" });
+      openConfirm({ type: "resetDefault", kind: "warning", title: "Restore Default Outfit",
+        copy: "Remove managed items and restore the character's default state?",
+        ok: "Restore Default Outfit", alt: "", cancel: "Cancel" });
     }
 
     function closeConfirmDialog() {
@@ -2565,10 +2603,10 @@
       for (let offset = 0; offset < SLOT_PAGE_SIZE && start + offset <= state.maxSlot; offset++) {
         const slot = start + offset;
         const info = slotInfo(slot);
-        rows.push(`<button class="save-target-row ${offset === state.saveTargetIndex ? "focused" : ""}" data-slot="${slot}"><span class="save-target-name">${esc(slotDisplayName(slot, info))}</span><span>${info.hasData ? "已保存" : "空"}</span><span>${info.hasData ? sexText(info.gender) : "—"}</span></button>`);
+        rows.push(`<button class="save-target-row ${offset === state.saveTargetIndex ? "focused" : ""}" data-slot="${slot}"><span class="save-target-name">${esc(slotDisplayName(slot, info))}</span><span>${info.hasData ? "Saved" : "Empty"}</span><span>${info.hasData ? sexText(info.gender) : "—"}</span></button>`);
       }
       saveTargetList.innerHTML = rows.join("");
-      document.getElementById("saveTargetSummary").textContent = `当前编辑搭配 · ${sexText(state.targetGender)} · 第 ${state.saveTargetPage + 1}/${maxPage + 1} 页`;
+      document.getElementById("saveTargetSummary").textContent = `Current Draft · ${sexText(state.targetGender)} · Page ${state.saveTargetPage + 1}/${maxPage + 1}`;
       saveTargetList.querySelectorAll(".save-target-row").forEach((button, index) => button.addEventListener("click", () => {
         state.saveTargetIndex = index;
         chooseSaveTarget(Number(button.dataset.slot));
@@ -2620,8 +2658,8 @@
           return;
         }
         closeSaveTargetDialog();
-        openConfirm({ type: "overwriteDraft", slot, kind: "warning", title: "覆盖保存套装",
-          copy: `${saveSlotLabel(slot, info)} 已有内容，是否用当前编辑搭配覆盖？`, ok: "覆盖保存", alt: "", cancel: "返回" });
+        openConfirm({ type: "overwriteDraft", slot, kind: "warning", title: "Overwrite Saved Outfit",
+          copy: `${saveSlotLabel(slot, info)} already contains an outfit. Overwrite it with the Current Draft?`, ok: "Overwrite", alt: "", cancel: "Back" });
         return;
       }
       saveEditorDraftTo(slot);
@@ -2635,11 +2673,11 @@
 
     function openRenameDialog() {
       const info = slotInfo(state.previewSlot);
-      if (!info.hasData) return showToast("请先选择已保存套装", true);
+      if (!info.hasData) return showToast("Select a saved outfit first", true);
       state.renamingSlot = true;
       renameInput.disabled = false;
       renameInput.value = info.name || "";
-      document.getElementById("renameTitle").textContent = `命名套装 ${pad(state.previewSlot)}`;
+      document.getElementById("renameTitle").textContent = `Name Outfit ${pad(state.previewSlot)}`;
       setDialogMascot("renameMascot", "question");
       renameDialog.dataset.kind = "save";
       renameDialog.classList.add("open");
@@ -2770,7 +2808,7 @@
       state.randomBusy = true;
       const firstRandom = !state.firstRandomStarted;
       state.firstRandomStarted = true;
-      if (firstRandom) showTopAssistant("正在挑选服装，请稍等哦");
+      if (firstRandom) showTopAssistant("Choosing an outfit. Please wait");
       render();
       const startRandom = () => {
         if (state.randomBusy) nativeCall("onOutfitManagerRandomPreview", {});
@@ -2787,7 +2825,7 @@
     function contextFunction() {
       if (state.mode === "studio") openMaterials();
       else if (state.mode === "materials") {
-        if (!state.selectedMaterialId) return showToast("请先选择一个材质");
+        if (!state.selectedMaterialId) return showToast("Select a material first");
         nativeCall("onOutfitManagerCommitMaterial", { token: state.selectedStudioToken, modId: state.selectedMaterialId });
       } else if (state.mode === "main") runRandomPreview();
       else if (state.mode === "slots") openClearConfirm();
@@ -2795,7 +2833,7 @@
 
     function contextSave() {
       if (state.mode === "studio") {
-        if (!state.studioDirty) return showToast("当前编辑搭配没有变化", true, "warning");
+        if (!state.studioDirty) return showToast("The studio draft has not changed", true, "warning");
         openSaveTargetDialog();
       }
       else if (state.mode === "slots") openSaveConfirm("slots");
@@ -2831,7 +2869,7 @@
         state.previewSource = "actual";
         state.mode = "main";
         render();
-        setStage("正在切换目标");
+        setStage("Switching Target");
         nativeCall("onOutfitManagerSelectTarget", { targetId: target.id });
       } else if (act === "category") {
         state.category = el.dataset.category || "all";
@@ -3300,7 +3338,7 @@
       state.homeMascotGroup = !state.quickSaveMode && !firstMascotSeen ? 3 : chooseHomeMascotGroup();
       state.slotPage = Math.floor((state.slot - 1) / SLOT_PAGE_SIZE);
       render();
-      setStage("人物显示：当前真实穿着");
+      setStage("Character: Actual Outfit");
       clearTimeout(previewTimer);
       if (state.quickSaveMode) requestAnimationFrame(() => openQuickSaveConfirm());
     }
@@ -3383,12 +3421,12 @@
 
     window.omReceiveMaterialChoices = data => {
       state.materials = Array.isArray(data && data.choices) ? data.choices : [];
-      state.materialItemName = data && data.itemName ? data.itemName : "材质交换";
+      state.materialItemName = data && data.itemName ? data.itemName : "Material Swap";
       state.loadingMaterials = false;
       if (!state.materials.length) {
         state.mode = "studio";
         state.materialDirty = false;
-        showTopAssistant("这件服装没有可用材质交换", true, "warning");
+        showTopAssistant("This item has no available material swaps", true, "warning");
         nativeCall("onOutfitManagerCancelMaterial", { token: state.selectedStudioToken, targetId: state.targetId });
         render();
         return;
@@ -3410,10 +3448,10 @@
         openConfirm({
           type: "outfitWarning",
           kind: "warning",
-          title: "套装内容有缺失",
-          copy: `发现 ${removed} 条已经失效的服装或改装记录\n当前「${slotDisplayName(warningSlot)}」尚未被修改\n\n无论选择哪一项，都只会清理这个套装中的失效记录，并保留恢复备份\n选择「继续穿」后会穿上剩余内容`,
-          ok: "继续穿",
-          cancel: "不穿了",
+          title: "Outfit Content Missing",
+          copy: `${removed} missing clothing or modification records were found\nCurrent "${slotDisplayName(warningSlot)}" has not been changed\n\nEither choice removes only missing records from this outfit and keeps a recovery backup\nChoose Continue to equip the remaining items`,
+          ok: "Continue",
+          cancel: "Don't Equip",
           defaultFocus: "cancel",
           slot: warningSlot,
           request: result.request || "preview",
@@ -3432,13 +3470,13 @@
           gender: Number(result.gender ?? previousInfo.gender ?? -1),
           items: Array.isArray(result.itemNames) ? result.itemNames : []
         });
-        showTopAssistant(result.message || "已清理这个套装中的失效记录", true);
+        showTopAssistant(result.message || "Missing records were removed from this outfit", true);
         render();
         return;
       }
       if (result.kind === "missingCleanupFailed") {
         state.randomBusy = false;
-        showTopAssistant(result.message || "套装备份或清理失败，原记录未修改", true, "warning");
+        showTopAssistant(result.message || "Outfit backup or cleanup failed; the original record was not changed", true, "warning");
         render();
         return;
       }
@@ -3447,10 +3485,10 @@
         openConfirm({
           type: "outfitWarning",
           kind: "warning",
-          title: "这个 NPC 可能是共享角色",
-          copy: "这个 NPC 使用了共享模板\n继续换装可能会让其他同类 NPC 一起发生变化",
-          ok: "继续换装",
-          cancel: "不换了",
+          title: "This NPC May Be Shared",
+          copy: "This NPC uses a shared template\nChanging their outfit may also affect similar NPCs",
+          ok: "Continue",
+          cancel: "Cancel",
           defaultFocus: "cancel",
           slot: Number(result.slot || state.previewSlot),
           request: result.request || "preview"
@@ -3459,7 +3497,7 @@
       }
       if (result.kind === "targetBlocked") {
         state.randomBusy = false;
-        showTopAssistant(result.message || "目标当前不能换装", true, "warning");
+        showTopAssistant(result.message || "The target cannot change outfits now", true, "warning");
         render();
         return;
       }
@@ -3515,12 +3553,12 @@
         state.lastSaveSource = "";
         if (state.mode === "main" || state.mode === "slots" || state.mode === "studio") render();
         if (quickSaveResult) {
-          showTopAssistant("这套搭配已经保存好啦");
+          showTopAssistant("This outfit has been saved");
           setTimeout(requestMenuClose, 800);
         }
       }
       if (result.kind === "studioCommit" && !result.ok) {
-        showToast("无法保留最后保存的套装", true, "warning");
+        showToast("Unable to keep the last saved outfit", true, "warning");
       }
       if (result.kind === "rename" && result.ok) {
         const slot = Number(result.slot || state.previewSlot);
@@ -3586,18 +3624,18 @@
       } else if (result.kind === "confirm" && !result.ok) {
         state.closeAfterApply = false;
       }
-      if (result.kind === "preview" && result.ok) setStage("试穿套装 " + pad(result.slot));
-      else if (result.kind === "confirm" && result.ok) setStage("已确认穿戴套装 " + pad(result.slot));
-      else if (result.kind === "random" && result.ok) setStage("随机试穿套装 " + pad(result.slot));
-      else if (result.kind === "studioPreview" && result.ok) setStage("工作台试穿");
-      else if (result.kind === "studioUnequip" && result.ok) setStage("\u5de5\u4f5c\u53f0\u5df2\u8131\u4e0b");
-      else if (result.kind === "materialPreview" && result.ok) setStage("材质临时试穿");
-      else if (result.kind === "materialCommit" && result.ok) setStage("材质物品已生成");
-      else if (result.kind === "defaultPreview" && result.ok) setStage("已恢复默认状态");
-      const successNotice = { save: "套装已保存", rename: "名称已保存", materialCommit: "材质已生成", confirm: "已确认穿戴", clear: "套装已清空", defaultPreview: "已恢复默认服装" };
-      const failureNotice = { save: "套装保存失败", rename: "名称保存失败", materialCommit: "材质生成失败", confirm: "换装失败", clear: "清空套装失败", studioUnequip: "无法脱下", defaultPreview: "恢复失败", target: "目标不可用" };
+      if (result.kind === "preview" && result.ok) setStage("Preview Outfit " + pad(result.slot));
+      else if (result.kind === "confirm" && result.ok) setStage("Confirmed Outfit " + pad(result.slot));
+      else if (result.kind === "random" && result.ok) setStage("Random Preview · Outfit " + pad(result.slot));
+      else if (result.kind === "studioPreview" && result.ok) setStage("Studio Preview");
+      else if (result.kind === "studioUnequip" && result.ok) setStage("Item Unequipped in Studio");
+      else if (result.kind === "materialPreview" && result.ok) setStage("Temporary Material Preview");
+      else if (result.kind === "materialCommit" && result.ok) setStage("Material Item Generated");
+      else if (result.kind === "defaultPreview" && result.ok) setStage("Default State Restored");
+      const successNotice = { save: "Outfit Saved", rename: "Name Saved", materialCommit: "Material Generated", confirm: "Outfit Confirmed", clear: "Outfit Cleared", defaultPreview: "Default Outfit Restored" };
+      const failureNotice = { save: "Failed to Save Outfit", rename: "Failed to Save Name", materialCommit: "Failed to Generate Material", confirm: "Outfit Change Failed", clear: "Failed to Clear Outfit", studioUnequip: "Unable to Unequip", defaultPreview: "Restore Failed", target: "Target Unavailable" };
       const notice = result.ok ? successNotice[result.kind] : (failureNotice[result.kind] || result.message);
-      if (quickSaveResult && !result.ok) showTopAssistant(result.message || "这套搭配没有保存成功，再试一次吧。", true);
+      if (quickSaveResult && !result.ok) showTopAssistant(result.message || "The outfit was not saved. Please try again.", true);
       else if (notice && !quickSaveResult) showToast(notice, !result.ok, result.ok ? "success" : "warning");
     };
 

@@ -1986,7 +1986,7 @@
         backMain: ["Tab", "返回服装管理主页面。"],
         close: ["Tab", state.hasPendingPreview ? "关闭前会询问是否确认穿戴当前试穿。" : "关闭菜单并返回游戏。"]
       };
-      const value = el && el.dataset && hints[el.dataset.act] ? hints[el.dataset.act] : ["", "想要做什么呢？请选择一项功能开始。"]; 
+      const value = el && el.dataset && hints[el.dataset.act] ? hints[el.dataset.act] : ["", "想要做什么呢？请选择一项功能开始。"];
       const bubble = document.getElementById("homeActionBubble");
       if (bubble) bubble.textContent = cleanTerminalStops(value[1]);
       const homeImage = document.getElementById("homeMascotImage");

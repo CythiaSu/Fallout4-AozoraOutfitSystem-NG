@@ -1,0 +1,67 @@
+{
+  "modName": "OutfitManager",
+  "displayName": "青空的服装管理系统",
+  "minMcmVersion": 1,
+  "pluginRequirements": ["OutfitManager.esp"],
+  "content": [
+    { "type": "section", "text": "系统状态" },
+    { "type": "text", "text": "青空的服装管理系统 · 套装保存、实时试穿、材质定制与角色换装" }
+  ],
+  "pages": [
+    {
+      "pageDisplayName": "热键",
+      "content": [
+        { "type": "section", "text": "基础功能" },
+        { "id": "OM_MenuHotkey", "type": "hotkey", "text": "打开/关闭管理系统", "help": "打开或关闭青空的服装管理系统", "valueOptions": { "allowModifierKeys": true } },
+        { "id": "OM_RandomHotkey", "type": "hotkey", "text": "随机换装", "help": "对目标随机更换一套符合其性别的已保存套装。", "valueOptions": { "allowModifierKeys": true } },
+        { "type": "section", "text": "活跃套装" },
+        { "type": "text", "text": "在服装管理界面确认穿戴，或使用随机换装、装备上一套、装备下一套成功换装后，该套装会成为当前活跃套装。以下功能都以当前活跃套装为起点执行。" },
+        { "id": "OM_PreviousOutfitHotkey", "type": "hotkey", "text": "装备上一套", "help": "从当前活跃套装开始，循环向前装备一套符合目标性别的可用套装。", "valueOptions": { "allowModifierKeys": true } },
+        { "id": "OM_NextOutfitHotkey", "type": "hotkey", "text": "装备下一套", "help": "从当前活跃套装开始，循环向后装备一套符合目标性别的可用套装。", "valueOptions": { "allowModifierKeys": true } },
+        { "id": "OM_SaveHotkey", "type": "hotkey", "text": "保存套装", "help": "将目标当前穿着保存到当前活跃套装；没有活跃套装时保存到第一个空位。", "valueOptions": { "allowModifierKeys": true } },
+        { "id": "OM_LoadHotkey", "type": "hotkey", "text": "装备当前套装", "help": "将当前活跃套装重新装备到目标身上。", "valueOptions": { "allowModifierKeys": true } }
+      ]
+    },
+    {
+      "pageDisplayName": "基础设置",
+      "content": [
+        { "type": "section", "text": "基础设置" },
+        { "id": "bEnableOutfitNotifications:Profile1", "type": "switcher", "text": "显示换装通知", "help": "显示换装完成、保存成功等状态通知。", "valueOptions": { "sourceType": "ModSettingBool" } },
+        { "type": "section", "text": "武器保存" },
+        { "type": "text", "text": "开启后，保存套装时会记录角色当前装备的武器、普通改造与传奇效果" },
+        { "type": "text", "text": "应用套装时不会复用背包中的武器，而是按照保存记录生成一把新的独立武器" },
+        { "type": "text", "text": "仅过滤可识别的 Fallout4.esm 原版唯一或特殊改装，普通改造与传奇效果会保留" },
+        { "type": "text", "text": "MOD 武器以及基础记录、脚本或特殊数据自带的效果无法通用识别，仍可能保留" },
+        { "type": "text", "text": "玩家或NPC没有对应弹药时，系统会静默补充3个弹匣，最少30发、最多180发；每种弹药对玩家及每名NPC在同一存档中只补充一次，切换存档后分别重新记录" },
+        { "type": "text", "text": "切换其他套装时会清理上一次由系统生成的武器；关闭后工作台不会加载武器，保存与换装只处理服装" },
+        { "id": "bSaveOutfitWeapons:Profile1", "type": "switcher", "text": "启用武器保存", "help": "开启后记录当前装备的武器、普通改造与传奇效果，并在应用套装时生成新的独立武器；关闭后工作台不加载武器", "valueOptions": { "sourceType": "ModSettingBool" } }
+      ]
+    },
+    {
+      "pageDisplayName": "提示与确认",
+      "content": [
+        { "type": "section", "text": "工作台提示" },
+        { "id": "bWarnWorkbenchNudity:Profile1", "type": "switcher", "text": "进入工作台前提示裸露", "help": "进入工作台前显示裸露内容提示。无论是否显示此提示，工作台都会从角色的当前真实穿着开始编辑。默认开启。", "valueOptions": { "sourceType": "ModSettingBool" } },
+        { "type": "section", "text": "确认弹窗" },
+        { "id": "bConfirmResetDefault:Profile1", "type": "switcher", "text": "恢复默认前确认", "valueOptions": { "sourceType": "ModSettingBool" } },
+        { "id": "bConfirmClearSavedOutfit:Profile1", "type": "switcher", "text": "清空套装前确认", "valueOptions": { "sourceType": "ModSettingBool" } },
+        { "id": "bConfirmOverwriteSavedOutfit:Profile1", "type": "switcher", "text": "覆盖套装前确认", "valueOptions": { "sourceType": "ModSettingBool" } },
+        { "id": "bConfirmExitPreview:Profile1", "type": "switcher", "text": "退出试穿前确认", "valueOptions": { "sourceType": "ModSettingBool" } },
+        { "id": "bConfirmDiscardStudioChanges:Profile1", "type": "switcher", "text": "离开工作台前确认", "valueOptions": { "sourceType": "ModSettingBool" } },
+        { "id": "bConfirmDiscardMaterialPreview:Profile1", "type": "switcher", "text": "离开材质预览前确认", "valueOptions": { "sourceType": "ModSettingBool" } }
+      ]
+    },
+    {
+      "pageDisplayName": "系统说明",
+      "content": [
+        { "type": "section", "text": "青空的服装管理系统" },
+        { "type": "text", "text": "英文名：Aozora Outfit Management System" },
+        { "type": "text", "text": "本系统由 Fallout4 Outfit Manager 全面升级而来，在保留原有套装管理能力的基础上，重新构建了试穿、搭配、材质交换与角色换装流程" },
+        { "type": "section", "text": "主要功能" },
+        { "type": "text", "text": "支持玩家与NPC的套装保存、快速换装、实时试穿、服装工作台编辑以及独立材质交换款生成" },
+        { "type": "section", "text": "兼容说明" },
+        { "type": "text", "text": "为兼容旧版设置与套装数据，插件文件、MCM标识和数据目录继续沿用 OutfitManager 名称" }
+      ]
+    }
+  ]
+}

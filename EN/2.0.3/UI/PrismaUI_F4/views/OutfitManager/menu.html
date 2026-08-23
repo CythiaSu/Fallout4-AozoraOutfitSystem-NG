@@ -1637,6 +1637,7 @@
       saveTargetPage: 0,
       saveTargetIndex: 0,
       studioDirty: false,
+      studioSaved: false,
       materialDirty: false,
       studioReturnPreview: null,
       hasPendingPreview: false,
@@ -2295,6 +2296,7 @@
         source: state.previewSource
       };
       state.studioDirty = false;
+      state.studioSaved = false;
       state.previewIsDefault = false;
       state.mode = "studio";
       state.returnMode = "main";
@@ -2323,10 +2325,15 @@
 
     function restoreBeforeStudio() {
       const previous = state.studioReturnPreview;
+      const savedInStudio = state.studioSaved;
       state.studioReturnPreview = null;
       state.studioDirty = false;
+      state.studioSaved = false;
       state.mode = "main";
-      if (previous && previous.pending && slotInfo(previous.slot).hasData) {
+      if (savedInStudio) {
+        render();
+        nativeCall("onOutfitManagerCommitSavedStudioOutfit", {});
+      } else if (previous && previous.pending && slotInfo(previous.slot).hasData) {
         state.previewSlot = previous.slot;
         state.previewSource = previous.source || "saved";
         state.hasPendingPreview = true;
@@ -3538,6 +3545,7 @@
         if (state.lastSaveSource === "studio") {
           state.mode = "studio";
           state.studioDirty = false;
+          state.studioSaved = true;
         } else {
           state.previewSource = "actual";
           state.hasPendingPreview = false;
@@ -3548,6 +3556,9 @@
           showTopAssistant("This outfit has been saved");
           setTimeout(requestMenuClose, 800);
         }
+      }
+      if (result.kind === "studioCommit" && !result.ok) {
+        showToast("Unable to keep the last saved outfit", true, "warning");
       }
       if (result.kind === "rename" && result.ok) {
         const slot = Number(result.slot || state.previewSlot);

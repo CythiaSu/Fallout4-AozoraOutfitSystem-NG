@@ -36,7 +36,7 @@ namespace fs = std::filesystem;
 
 OUTFITMANAGER_EXPORT F4SE::PluginVersionData F4SEPlugin_Version = []() noexcept {
     F4SE::PluginVersionData v{};
-    v.PluginVersion({ 2, 0, 2, 0 });
+    v.PluginVersion({ 2, 0, 4, 0 });
     v.PluginName("OutfitManager");
     v.AuthorName("OutfitManager Author");
     v.UsesAddressLibrary(true);
@@ -3977,7 +3977,7 @@ static std::string Summ(int s) {
 }
 
 // ======== Native Functions ========
-RE::BSFixedString OM_GetPluginVersion(std::monostate) { return "2.0 PREVIEW STUDIO TEST 41"; }
+RE::BSFixedString OM_GetPluginVersion(std::monostate) { return "2.0.4"; }
 RE::BSFixedString OM_GetSlotPath(std::monostate, int s) { return SlotPath(s).string().c_str(); }
 bool OM_IsMenuAvailable(std::monostate) { return GetModuleHandleW(L"PrismaUI_F4.dll") != nullptr; }
 bool OM_PreparePlayerPreview(std::monostate) {

@@ -354,6 +354,8 @@ struct PreviewSession {
     std::vector<PreviewTempInstance> temporary;
     std::vector<ManagedInstanceRef> persistentPreview;
     int previewSlot = 0;
+    bool hasSavedDraft = false;
+    int lastSavedSlot = 0;
 };
 struct MaterialRestoreSession {
     bool active = false;
@@ -419,6 +421,7 @@ static std::unordered_map<int, std::vector<MaterialChoice>> g_materialCache;
 static int g_nextStudioToken = 1;
 static bool g_inputSinkRegistered = false;
 static bool g_coverMonitorStarted = false;
+static bool g_dialogueGuardRegistered = false;
 static ULONGLONG g_lastUiWakeMs = 0;
 static std::atomic_uint32_t g_previewRequestSerial{ 0 };
 static std::atomic_uint32_t g_restoreSerial{ 0 };
@@ -454,6 +457,7 @@ static bool ApplyPreviewCameraIfReady(const RE::ObjectRefHandle& previewHandle, 
 static void RotatePreviewTarget(int direction);
 static void ClearPreviewLights();
 static void EnsurePreviewLights(RE::Actor* actor);
+static bool CommitSavedStudioOutfit();
 static void CloseMenuInternal(bool rollback);
 static void FinishMenuCloseAfterCamera(std::uint32_t closeSerial);
 static void QueueGameTask(std::function<void()> task);
@@ -633,6 +637,35 @@ static bool BlockingGameMenuOpen() {
     });
 }
 
+class OutfitManagerMenuOpenCloseHandler final : public RE::BSTEventSink<RE::MenuOpenCloseEvent> {
+public:
+    static OutfitManagerMenuOpenCloseHandler* GetSingleton() {
+        static OutfitManagerMenuOpenCloseHandler instance;
+        return &instance;
+    }
+
+    RE::BSEventNotifyControl ProcessEvent(
+        const RE::MenuOpenCloseEvent& event,
+        RE::BSTEventSource<RE::MenuOpenCloseEvent>*) override
+    {
+        if (g_menuOpen && event.opening && event.menuName == RE::BSFixedString("DialogueMenu")) {
+            // DialogueMenu owns the conversation camera and would temporarily
+            // hide Prisma. Reject only this opening while our panel is active.
+            RE::DialogueMenuUtils::CloseMenu();
+            LogLine("2.0 blocked DialogueMenu while OutfitManager is open");
+        }
+        return RE::BSEventNotifyControl::kContinue;
+    }
+};
+
+static void RegisterDialogueMenuGuard() {
+    if (g_dialogueGuardRegistered) return;
+    auto* ui = RE::UI::GetSingleton();
+    if (!ui) return;
+    ui->RegisterSink(OutfitManagerMenuOpenCloseHandler::GetSingleton());
+    g_dialogueGuardRegistered = true;
+}
+
 static bool PresentMenuView(const char* reason, bool ensureVisible = true) {
     if (!g_menuOpen || g_hiddenBehindGameMenu || !g_viewReady ||
         !g_prisma || g_view == 0 || !g_prisma->IsValid(g_view)) {
@@ -775,6 +808,12 @@ static void KeepMenuViewAwake() {
 
 static void UpdateGameMenuCoverState() {
     if (!g_menuOpen) return;
+    if (auto* ui = RE::UI::GetSingleton(); ui &&
+        ui->GetMenuOpen(RE::BSFixedString("DialogueMenu"))) {
+        RE::DialogueMenuUtils::CloseMenu();
+        LogLine("2.0 dialogue guard closed DialogueMenu during OutfitManager session");
+        return;
+    }
     if (NativeMenuBlocksOpen()) {
         if (!g_hiddenBehindGameMenu) HideMenuForGameMenu();
         return;
@@ -2459,7 +2498,16 @@ static void SaveCurrentMenuOutfit(const std::string& payload) {
 
     WriteIndex();
     g_curSlot = slot;
-    if (!savedPreviewDraft) SetActiveSlotForActor(actor, slot);
+    if (savedPreviewDraft) {
+        // Saving in the studio does not equip/activate the slot yet.  Keep the
+        // last successful save for the studio close path; unsaved edits made
+        // afterwards must not become the outfit that survives closing.
+        g_preview.hasSavedDraft = true;
+        g_preview.lastSavedSlot = slot;
+        LogLine("2.0 studio save recorded slot=" + std::to_string(slot));
+    } else {
+        SetActiveSlotForActor(actor, slot);
+    }
     WriteState();
 
     std::string itemsJson = "[";
@@ -2716,9 +2764,7 @@ static void OnMenuRandomPreview(const char* js) {
 }
 
 static bool CanOpenStudioForActor(RE::Actor* actor, bool allowSharedTemplate) {
-    if (!actor || CheckOutfitTargetState(actor, allowSharedTemplate) != OutfitTargetState::kAllowed) return false;
-    return actor == RE::PlayerCharacter::GetSingleton() ||
-        actor->DoGetSitSleepState() == RE::SIT_SLEEP_STATE::kNormal;
+    return actor && CheckOutfitTargetState(actor, allowSharedTemplate) == OutfitTargetState::kAllowed;
 }
 
 static void OnMenuCheckStudio(const char* js) {
@@ -2742,7 +2788,7 @@ static void OnMenuCheckStudio(const char* js) {
         SendUiResult("studioCheck", allowed, g_curSlot,
             allowed ? "Outfit Studio is available" :
                 (targetState == OutfitTargetState::kAllowed ?
-                    "The target must be standing to enter the Outfit Studio" :
+                    "Please use Outfit Studio while the target is standing" :
                     OutfitTargetStateMessage(targetState)),
             "\"allowSharedTemplate\":" + std::string(allowSharedTemplate ? "true" : "false"));
     });
@@ -2757,7 +2803,7 @@ static void OnMenuOpenStudio(const char* js) {
         const bool allowSharedTemplate =
             json::getInt(payload, "allowSharedTemplate", 0) != 0;
         if (!CanOpenStudioForActor(actor, allowSharedTemplate)) {
-            SendUiResult("studioOpen", false, g_curSlot, "The target must be standing to enter the Outfit Studio");
+            SendUiResult("studioOpen", false, g_curSlot, "Please use Outfit Studio while the target is standing");
             return;
         }
         if (BeginStudioDraft(actor) <= 0) {
@@ -3008,6 +3054,17 @@ static void OnMenuPreviewDefaultOutfit(const char* js) {
 static void OnMenuClose(const char*) {
     QueueGameTask([] { ++g_previewRequestSerial; CloseMenuInternal(true); });
 }
+static void OnMenuCommitSavedStudioOutfit(const char*) {
+    QueueGameTask([] {
+        if (!g_menuOpen) return;
+        const bool kept = CommitSavedStudioOutfit();
+        SendUiResult(
+            "studioCommit",
+            kept,
+            g_curSlot,
+            kept ? "The last saved outfit was kept" : "Unable to keep the last saved outfit");
+    });
+}
 
 static void OnDomReady(PrismaView v) {
     if (!g_prisma || v == 0 || v != g_view || !g_prisma->IsValid(v)) {
@@ -3042,6 +3099,7 @@ static void OnDomReady(PrismaView v) {
     g_prisma->BindUIEvent(v, "onOutfitManagerCommitMaterial", OnMenuCommitMaterial);
     g_prisma->BindUIEvent(v, "onOutfitManagerCancelMaterial", OnMenuCancelMaterial);
     g_prisma->BindUIEvent(v, "onOutfitManagerRollbackPreview", OnMenuRollbackPreview);
+    g_prisma->BindUIEvent(v, "onOutfitManagerCommitSavedStudioOutfit", OnMenuCommitSavedStudioOutfit);
     g_prisma->BindUIEvent(v, "onOutfitManagerClose", OnMenuClose);
     g_viewReady = true;
     std::string pendingScript;
@@ -3325,53 +3383,28 @@ static bool IsActorInPowerArmor(RE::Actor* a) {
     try { return RE::PowerArmor::ActorInPowerArmor(*a); } catch (...) { return false; }
 }
 static bool IsHumanoidOutfitTarget(RE::TESNPC* npc) {
-    if (!npc || !npc->HasApplicableKeywordString("ActorTypeNPC")) return false;
-    if (npc->HasApplicableKeywordString("ActorTypeRobot") ||
-        npc->HasApplicableKeywordString("ActorTypeAnimal") ||
-        npc->HasApplicableKeywordString("ActorTypeCreature") ||
-        npc->HasApplicableKeywordString("ActorTypeChild")) {
-        return false;
-    }
-    // Gen 1/2 synths and Valentine use a non-human synth race. Human-race
-    // synths remain valid outfit targets.
-    if (npc->HasApplicableKeywordString("ActorTypeSynth") &&
-        !npc->HasApplicableKeywordString("ActorTypeHuman")) {
-        return false;
-    }
-    return true;
+    if (!npc) return false;
+    // Keep the target filter deliberately broad. Custom humanoid races,
+    // ghouls, synths, children, and other NPC-style races may still support
+    // clothing even when they do not use the vanilla human keywords.
+    // Exclude only the race categories that are inherently non-wearable for
+    // this system: animals, creatures, and robots such as Dogmeat.
+    return !npc->HasApplicableKeywordString("ActorTypeAnimal") &&
+           !npc->HasApplicableKeywordString("ActorTypeCreature") &&
+           !npc->HasApplicableKeywordString("ActorTypeRobot");
 }
 static bool IsSelectableTarget(RE::Actor* a) {
     if (!a || a->IsDead(false) || IsActorInPowerArmor(a)) return false;
-    if (a->lifeState != static_cast<std::uint32_t>(RE::ACTOR_LIFE_STATE::kAlive)) return false;
     auto* npc = a->GetNPC();
     if (!IsHumanoidOutfitTarget(npc)) return false;
-    const int sex = GetSex(a);
-    if (sex != 0 && sex != 1) return false;
     return true;
 }
 
-static OutfitTargetState CheckOutfitTargetState(RE::Actor* actor, bool allowSharedTemplate) {
-    if (!actor) return OutfitTargetState::kSceneControlled;
-    if (actor->lifeState != static_cast<std::uint32_t>(RE::ACTOR_LIFE_STATE::kAlive)) {
-        return OutfitTargetState::kSceneControlled;
-    }
-    auto* player = RE::PlayerCharacter::GetSingleton();
-    if (actor->IsInCombat() || (player && player->IsInCombat())) {
-        return OutfitTargetState::kCombat;
-    }
-    if (actor != player) {
-        if (actor->boolFlags.any(
-                RE::Actor::BOOL_FLAGS::kScenePackage,
-                RE::Actor::BOOL_FLAGS::kInRandomScene,
-                RE::Actor::BOOL_FLAGS::kInBleedoutAnimation,
-                RE::Actor::BOOL_FLAGS::kIsInKillMove,
-                RE::Actor::BOOL_FLAGS::kMovingIntoLoadedArea)) {
-            return OutfitTargetState::kSceneControlled;
-        }
+static OutfitTargetState CheckOutfitTargetState(RE::Actor* actor, [[maybe_unused]] bool allowSharedTemplate) {
+    if (!actor || actor->IsDead(false)) return OutfitTargetState::kSceneControlled;
+    if (actor != RE::PlayerCharacter::GetSingleton() && !allowSharedTemplate) {
         auto* npc = actor->GetNPC();
-        if (!allowSharedTemplate && npc && npc->UsesTemplate() && !npc->IsUnique()) {
-            return OutfitTargetState::kSharedTemplate;
-        }
+        if (npc && npc->UsesTemplate() && !npc->IsUnique()) return OutfitTargetState::kSharedTemplate;
     }
     return OutfitTargetState::kAllowed;
 }
@@ -3836,7 +3869,7 @@ static std::vector<TargetInfo> BuildTargetList(RE::Actor* currentTarget) {
     if (!cell) return targets;
 
     const float scanRadius = static_cast<float>(g_previewTuning.targetScanRadius);
-    constexpr std::size_t maxNpcTargets = 15;
+    constexpr std::size_t maxNpcTargets = 50;
     const auto origin = player->GetPosition();
     cell->ForEachReferenceInRange(origin, scanRadius, [&](RE::TESObjectREFR* ref) {
         auto* actor = ref ? ref->As<RE::Actor>() : nullptr;
@@ -3955,6 +3988,7 @@ bool OM_PreparePlayerPreview(std::monostate) {
 
 static bool OpenMenuInternal(RE::Actor* t, int quickSaveSlot) {
     RegisterInputSink();
+    RegisterDialogueMenuGuard();
     StartGameMenuCoverMonitor();
     if (!t) t = RE::PlayerCharacter::GetSingleton();
     std::unique_lock<std::mutex> lk(g_mx);
@@ -5632,6 +5666,37 @@ static void RollbackPreview(bool scheduleRetry) {
         if (scheduleRetry) SchedulePreviewRestoreRetry(g_preview.actor, g_preview.original);
     }
     g_preview = {};
+}
+
+static bool CommitSavedStudioOutfit() {
+    if (!g_preview.active || !g_preview.hasSavedDraft || g_preview.lastSavedSlot <= 0) return false;
+
+    const int slot = g_preview.lastSavedSlot;
+    auto actorRef = g_preview.actor.get();
+    auto* actor = actorRef ? actorRef->As<RE::Actor>() : nullptr;
+    if (!actor) {
+        LogLine("2.0 studio close saved outfit skipped: target unloaded");
+        return false;
+    }
+
+    // Restore the entry snapshot first, without scheduling the delayed
+    // original-outfit retry.  The normal equip path then becomes the only
+    // owner of the final equipment state and can rebuild managed instances
+    // exactly like an ordinary outfit application.
+    RollbackPreview(false);
+    const int result = EquipOutfitForActor(slot, actor, true, true);
+    if (result > 0) {
+        g_lastEquippedSlot = slot;
+        LogLine("2.0 studio close kept last saved outfit target=" +
+            FormIDHex(actor->GetFormID()) + " slot=" + std::to_string(slot) +
+            " equipped=" + std::to_string(result));
+        return true;
+    }
+
+    LogLine("2.0 studio close failed to equip last saved outfit target=" +
+        FormIDHex(actor->GetFormID()) + " slot=" + std::to_string(slot) +
+        " result=" + std::to_string(result));
+    return false;
 }
 
 static void AcceptPreviewAsCurrent(RE::Actor* actor, int slot) {

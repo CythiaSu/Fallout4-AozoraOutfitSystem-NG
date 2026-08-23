@@ -36,7 +36,7 @@ namespace fs = std::filesystem;
 
 OUTFITMANAGER_EXPORT F4SE::PluginVersionData F4SEPlugin_Version = []() noexcept {
     F4SE::PluginVersionData v{};
-    v.PluginVersion({ 2, 0, 2, 0 });
+    v.PluginVersion({ 2, 0, 4, 0 });
     v.PluginName("OutfitManager");
     v.AuthorName("OutfitManager Author");
     v.UsesAddressLibrary(true);
@@ -1392,8 +1392,8 @@ static bool LoadSlotNames() {
 
 static bool WriteSlotNames() {
     std::ostringstream file;
-    file << "# OutfitManager 槽位名称（UTF-8）\n";
-    file << "# 格式：001 = 名称；等号右侧留空即显示默认槽位名称。\n";
+    file << "# OutfitManager slot names (UTF-8)\n";
+    file << "# Format: 001 = Name. Leave the value empty to use the default slot name.\n";
     for (int slot = 1; slot <= MAX_SLOTS; ++slot) {
         char key[8];
         std::snprintf(key, sizeof(key), "%03d", slot);
@@ -1523,7 +1523,7 @@ static bool MatchesSavedFormMetadata(
 static std::string SavedItemDisplayName(const OE& item) {
     std::string display = item.name.empty() ? "Unknown" : item.name;
     if (item.weapon) {
-        if (!item.mods.empty()) display += " [已改造]";
+        if (!item.mods.empty()) display += " [Modified]";
         return display;
     }
     std::vector<std::string> labels;
@@ -1653,8 +1653,8 @@ static bool ReadSlotMetadata(
                 const auto firstMod = entry.find_first_not_of(" \t\r\n", modsOpen + 1);
                 if (firstMod != std::string::npos && firstMod < modsEnd) {
                     displayName += json::getStr(entry, "type") == "weapon" ?
-                        " [已改造]" :
-                        " [材质/改装]";
+                        " [Modified]" :
+                        " [Material/Mods]";
                 }
             }
         }
@@ -2387,7 +2387,7 @@ static void OnMenuClearSlot(const char* js) {
             WriteIndex();
             ClearActiveSlotReferences(slot);
         }
-        SendUiResult("clear", ok, slot, ok ? "套装已清空" : "清空套装失败", {});
+        SendUiResult("clear", ok, slot, ok ? "Outfit Cleared" : "Failed to Clear Outfit", {});
     });
 }
 static void OnMenuResetNpcOutfit(const char* js) { SetMenuAction(js, 5); }
@@ -2470,7 +2470,7 @@ static void SaveCurrentMenuOutfit(const std::string& payload) {
     const int slot = std::clamp(json::getInt(payload, "slot", g_curSlot), 1, MAX_SLOTS);
     auto* actor = ResolveMenuActorByFormID(json::getHexID(payload, "targetId", 0));
     if (!actor || IsActorInPowerArmor(actor)) {
-        return SendUiResult("save", false, slot, "当前目标无法保存套装");
+        return SendUiResult("save", false, slot, "The current target cannot save an outfit");
     }
 
     SetMenuActor(actor);
@@ -2490,10 +2490,10 @@ static void SaveCurrentMenuOutfit(const std::string& payload) {
     }
     const auto clothingCount = std::count_if(items.begin(), items.end(), [](const OE& item) { return !item.weapon; });
     if (gender < 0 || clothingCount <= 0) {
-        return SendUiResult("save", false, slot, "当前目标没有可保存的服装");
+        return SendUiResult("save", false, slot, "The current target has no clothing that can be saved");
     }
     if (!WriteSlot(slot, gender, items)) {
-        return SendUiResult("save", false, slot, "写入套装文件失败");
+        return SendUiResult("save", false, slot, "Failed to write the outfit file");
     }
 
     WriteIndex();
@@ -2520,7 +2520,7 @@ static void SaveCurrentMenuOutfit(const std::string& payload) {
         "save",
         true,
         slot,
-        "套装已保存至槽位 " + std::to_string(slot),
+        "Outfit saved to slot " + std::to_string(slot),
         "\"count\":" + std::to_string(items.size()) +
             ",\"gender\":" + std::to_string(gender) +
             ",\"items\":" + itemsJson);
@@ -2568,7 +2568,7 @@ static void OnMenuPreviewSlot(const char* js) {
                     "missingCleanupFailed",
                     false,
                     slot,
-                    "无法读取这个套装，原记录未修改");
+                    "Unable to read this outfit; the original record was not changed");
             }
             const bool cleaned = status.RemovedCount() <= 0 ||
                 PersistResolvedSlotRecords(slot, slotGender, resolvedItems, status);
@@ -2576,7 +2576,7 @@ static void OnMenuPreviewSlot(const char* js) {
                 cleaned ? "missingCleaned" : "missingCleanupFailed",
                 cleaned,
                 slot,
-                cleaned ? "已清理这个套装中的失效记录" : "无法备份并更新这个套装",
+                cleaned ? "Missing records were removed from this outfit" : "Failed to back up and update this outfit",
                 BuildCleanedSlotResultExtra(
                     slotGender,
                     resolvedItems,
@@ -2584,7 +2584,7 @@ static void OnMenuPreviewSlot(const char* js) {
         }
         const auto targetID = json::getHexID(payload, "targetId", 0);
         auto* actor = ResolveMenuActorByFormID(targetID);
-        if (!actor) return SendUiResult("preview", false, slot, "目标不可用");
+        if (!actor) return SendUiResult("preview", false, slot, "Target unavailable");
         const bool allowSharedTemplate =
             json::getInt(payload, "allowSharedTemplate", 0) != 0 ||
             json::getInt(payload, "acknowledgeWarnings", 0) != 0;
@@ -2608,7 +2608,7 @@ static void OnMenuPreviewSlot(const char* js) {
             &slotGender);
         if (status.RemovedCount() > 0 && !acknowledgeMissing) {
             return SendUiResult("missingOutfit", false, slot,
-                "发现失效记录，原始套装暂未修改",
+                "Missing records found; the original outfit has not been changed",
                 "\"missingItems\":" + std::to_string(status.missingItems) +
                 ",\"missingMods\":" + std::to_string(status.missingMods) +
                 ",\"recordsPreserved\":true" +
@@ -2621,13 +2621,13 @@ static void OnMenuPreviewSlot(const char* js) {
                     "missingCleanupFailed",
                     false,
                     slot,
-                    "无法备份并更新这个套装");
+                    "Failed to back up and update this outfit");
             }
             SendUiResult(
                 "missingCleaned",
                 true,
                 slot,
-                "已清理这个套装中的失效记录",
+                "Missing records were removed from this outfit",
                 BuildCleanedSlotResultExtra(
                     slotGender,
                     resolvedSlotItems,
@@ -2638,13 +2638,13 @@ static void OnMenuPreviewSlot(const char* js) {
                 randomSource ? "random" : "preview",
                 false,
                 slot,
-                validation == -2 ? "槽位性别与当前目标不符" : "套装中没有可穿戴内容");
+                validation == -2 ? "The slot does not match the target" : "The outfit has no wearable items");
         }
         SetMenuActor(actor);
         const int result = PreviewSavedItems(actor, probeItems, slot);
         if (randomSource && result > 0) g_lastRandSlot = slot;
         SendUiResult(randomSource ? "random" : "preview", result > 0, slot,
-            result > 0 ? "正在预览槽位套装" : (result == -2 ? "槽位性别与当前目标不符" : "无法预览此槽位"),
+            result > 0 ? "Previewing Saved Outfit" : (result == -2 ? "The slot does not match the target" : "Unable to Preview This Slot"),
             "\"count\":" + std::to_string((std::max)(result, 0)));
     });
 }
@@ -2656,7 +2656,7 @@ static void OnMenuSetSlot(const char* js) {
         const int slot = std::clamp(json::getInt(payload, "slot", g_curSlot), 1, MAX_SLOTS);
         g_curSlot = slot;
         WriteState();
-        SendUiResult("slotSelected", true, slot, "管理槽位已切换至 " + std::to_string(slot));
+        SendUiResult("slotSelected", true, slot, "Managed slot changed to " + std::to_string(slot));
     });
 }
 
@@ -2666,14 +2666,14 @@ static void OnMenuRenameSlot(const char* js) {
         if (!g_menuOpen) return;
         const int slot = std::clamp(json::getInt(payload, "slot", g_curSlot), 1, MAX_SLOTS);
         if (!g_indexBySlot.contains(slot)) {
-            return SendUiResult("rename", false, slot, "空槽位不能命名");
+            return SendUiResult("rename", false, slot, "An empty slot cannot be named");
         }
         const std::string name = CleanSlotName(json::getStr(payload, "name"));
         if (!WriteSlotName(slot, name)) {
-            return SendUiResult("rename", false, slot, "槽位名称写入失败");
+            return SendUiResult("rename", false, slot, "Failed to write the slot name");
         }
         g_slotDetails[slot].name = name;
-        SendUiResult("rename", true, slot, name.empty() ? "已恢复默认槽位名称" : "槽位名称已保存",
+        SendUiResult("rename", true, slot, name.empty() ? "Default slot name restored" : "Slot name saved",
             "\"name\":\"" + json::esc(name) + "\"");
     });
 }
@@ -2685,11 +2685,11 @@ static void OnMenuConfirmPreview(const char* js) {
         const int slot = std::clamp(json::getInt(payload, "slot", g_curSlot), 1, MAX_SLOTS);
         const auto targetID = json::getHexID(payload, "targetId", 0);
         auto* actor = ResolveMenuActorByFormID(targetID);
-        if (!actor) return SendUiResult("confirm", false, slot, "目标不可用");
+        if (!actor) return SendUiResult("confirm", false, slot, "Target unavailable");
         SetMenuActor(actor);
         const int result = CommitPreviewForActor(slot, actor);
         SendUiResult("confirm", result > 0, slot,
-            result > 0 ? "换装已确认" : "确认换装失败",
+            result > 0 ? "Outfit Confirmed" : "Failed to Confirm Outfit",
             "\"count\":" + std::to_string((std::max)(result, 0)));
     });
 }
@@ -2702,10 +2702,10 @@ static void OnMenuRandomPreview(const char* js) {
         if (!g_menuOpen) return;
         const auto targetID = json::getHexID(payload, "targetId", 0);
         auto* actor = ResolveMenuActorByFormID(targetID);
-        if (!actor) return SendUiResult("random", false, 0, "目标不可用");
+        if (!actor) return SendUiResult("random", false, 0, "Target unavailable");
         SetMenuActor(actor);
         const int slot = ChooseRandomSlotNative(GetSex(actor), 0, g_lastRandSlot);
-        if (slot <= 0) return SendUiResult("random", false, 0, "没有符合目标性别的其他套装");
+        if (slot <= 0) return SendUiResult("random", false, 0, "No other saved outfit matches the target");
         const bool allowSharedTemplate =
             json::getInt(payload, "allowSharedTemplate", 0) != 0 ||
             json::getInt(payload, "acknowledgeWarnings", 0) != 0;
@@ -2729,7 +2729,7 @@ static void OnMenuRandomPreview(const char* js) {
             &slotGender);
         if (status.RemovedCount() > 0 && !acknowledgeMissing) {
             return SendUiResult("missingOutfit", false, slot,
-                "发现失效记录，原始套装暂未修改",
+                "Missing records found; the original outfit has not been changed",
                 "\"missingItems\":" + std::to_string(status.missingItems) +
                 ",\"missingMods\":" + std::to_string(status.missingMods) +
                 ",\"recordsPreserved\":true" +
@@ -2742,23 +2742,23 @@ static void OnMenuRandomPreview(const char* js) {
                     "missingCleanupFailed",
                     false,
                     slot,
-                    "无法备份并更新这个套装");
+                    "Failed to back up and update this outfit");
             }
             SendUiResult(
                 "missingCleaned",
                 true,
                 slot,
-                "已清理这个套装中的失效记录",
+                "Missing records were removed from this outfit",
                 BuildCleanedSlotResultExtra(slotGender, resolvedSlotItems, "random"));
         }
         if (validation <= 0) {
             return SendUiResult("random", false, slot,
-                validation == -2 ? "槽位性别与当前目标不符" : "套装中没有可穿戴内容");
+                validation == -2 ? "The slot does not match the target" : "The outfit has no wearable items");
         }
         const int result = PreviewSavedItems(actor, probeItems, slot);
         if (result > 0) g_lastRandSlot = slot;
         SendUiResult("random", result > 0, slot,
-            result > 0 ? "正在随机预览" : "随机预览失败",
+            result > 0 ? "Previewing Random Outfit" : "Random Preview Failed",
             "\"count\":" + std::to_string((std::max)(result, 0)));
     });
 }
@@ -2786,9 +2786,9 @@ static void OnMenuCheckStudio(const char* js) {
         const bool allowed = targetState == OutfitTargetState::kAllowed &&
             CanOpenStudioForActor(actor, allowSharedTemplate);
         SendUiResult("studioCheck", allowed, g_curSlot,
-            allowed ? "可以进入服装工作台" :
+            allowed ? "Outfit Studio is available" :
                 (targetState == OutfitTargetState::kAllowed ?
-                    "请在站立时使用服装工作台" :
+                    "Please use Outfit Studio while the target is standing" :
                     OutfitTargetStateMessage(targetState)),
             "\"allowSharedTemplate\":" + std::string(allowSharedTemplate ? "true" : "false"));
     });
@@ -2803,11 +2803,11 @@ static void OnMenuOpenStudio(const char* js) {
         const bool allowSharedTemplate =
             json::getInt(payload, "allowSharedTemplate", 0) != 0;
         if (!CanOpenStudioForActor(actor, allowSharedTemplate)) {
-            SendUiResult("studioOpen", false, g_curSlot, "请在站立时使用服装工作台");
+            SendUiResult("studioOpen", false, g_curSlot, "Please use Outfit Studio while the target is standing");
             return;
         }
         if (BeginStudioDraft(actor) <= 0) {
-            SendUiResult("studioOpen", false, g_curSlot, "无法建立工作台编辑搭配");
+            SendUiResult("studioOpen", false, g_curSlot, "Unable to create a studio draft");
             return;
         }
         ScheduleStudioInventoryRefresh(requestSerial);
@@ -2832,7 +2832,7 @@ static void OnMenuPreviewStudioItem(const char* js) {
             ScheduleStudioInventoryRefresh(requestSerial);
         }
         SendUiResult("studioPreview", result > 0, g_curSlot,
-            result > 0 ? "服装预览已更新" : "无法预览此服装");
+            result > 0 ? "Clothing Preview Updated" : "Unable to Preview This Item");
     });
 }
 
@@ -2850,7 +2850,7 @@ static void OnMenuUnequipStudioItem(const char* js) {
             ScheduleStudioInventoryRefresh(requestSerial);
         }
         SendUiResult("studioUnequip", result > 0, g_curSlot,
-            result > 0 ? "已脱下当前服装" : "无法脱下此服装");
+            result > 0 ? "Item Unequipped" : "Unable to Unequip This Item");
     });
 }
 
@@ -2892,7 +2892,7 @@ static void OnMenuPreviewMaterial(const char* js) {
             ScheduleStudioInventoryRefresh(requestSerial);
         }
         SendUiResult("materialPreview", result > 0, g_curSlot,
-            result > 0 ? "材质预览已更新" : "材质预览失败");
+            result > 0 ? "Material Preview Updated" : "Material Preview Failed");
     });
 }
 
@@ -2926,7 +2926,7 @@ static void OnMenuCommitMaterial(const char* js) {
             ScheduleStudioInventoryRefresh(g_previewRequestSerial.load());
         }
         SendUiResult("materialCommit", result > 0, g_curSlot,
-            result > 0 ? "已生成并穿上材质款" : "生成材质服装失败",
+            result > 0 ? "Material Variant Generated and Equipped" : "Failed to Generate Material Variant",
             result > 0 ? "\"token\":" + std::to_string(focusToken) +
                 ",\"name\":\"" + json::esc(generatedName) + "\"" : std::string{});
     });
@@ -2941,7 +2941,7 @@ static void OnMenuCancelMaterial(const char* js) {
         ++g_previewRequestSerial;
         auto* actor = ResolveMenuActorByFormID(json::getHexID(payload, "targetId", 0));
         if (!g_materialRestore.active) {
-            SendUiResult("materialCancel", true, g_curSlot, "已退出材质试穿");
+            SendUiResult("materialCancel", true, g_curSlot, "Material Preview Closed");
             return;
         }
         if (g_materialRestore.active) {
@@ -2973,8 +2973,8 @@ static void OnMenuCancelMaterial(const char* js) {
         const std::string script = "if(window.omRefreshStudioInventory)window.omRefreshStudioInventory(" + data + ");";
         InvokeMenuScript(script.c_str());
         SendUiResult("materialCancel", result > 0, g_curSlot,
-            result > 0 ? (hasCommitted ? "已返回最后生成的材质款" : "已恢复进入材质页前的服装")
-                       : "恢复材质试穿前状态失败",
+            result > 0 ? (hasCommitted ? "Returned to the last generated material variant" : "Restored the item worn before Material Preview")
+                       : "Failed to restore the state before Material Preview",
             result > 0 ? "\"token\":" + std::to_string(focusToken) +
                 ",\"name\":\"" + json::esc(focusName) + "\"" : std::string{});
     });
@@ -2987,7 +2987,7 @@ static void OnMenuRollbackPreview(const char*) {
         RollbackPreview();
         auto* actor = ResolveMenuActorByFormID(0);
         if (actor) PositionPreviewCamera(actor);
-        SendUiResult("rollback", true, g_curSlot, "临时预览已撤销");
+        SendUiResult("rollback", true, g_curSlot, "Temporary Preview Reverted");
     });
 }
 
@@ -2997,11 +2997,11 @@ static void OnMenuSelectTarget(const char* js) {
         if (!g_menuOpen) return;
         const auto formID = json::getHexID(payload, "targetId", 0);
         auto* actor = ResolveMenuActorByFormID(formID);
-        if (!actor) return SendUiResult("target", false, 0, "目标不可用");
+        if (!actor) return SendUiResult("target", false, 0, "Target unavailable");
         RollbackPreview();
         SetMenuActor(actor);
         PositionPreviewCamera(actor);
-        SendUiResult("target", true, 0, "已选择目标",
+        SendUiResult("target", true, 0, "Target Selected",
             "\"targetId\":\"" + FormIDHex(actor->formID) + "\",\"targetName\":\"" + json::esc(GetName(actor)) + "\"");
     });
 }
@@ -3028,7 +3028,7 @@ static void OnMenuPreviewDefaultOutfit(const char* js) {
     QueueGameTask([payload] {
         if (!g_menuOpen) return;
         auto* actor = ResolveMenuActorByFormID(json::getHexID(payload, "targetId", 0));
-        if (!actor) return SendUiResult("defaultPreview", false, g_curSlot, "目标不可用");
+        if (!actor) return SendUiResult("defaultPreview", false, g_curSlot, "Target unavailable");
         const bool allowSharedTemplate =
             json::getInt(payload, "allowSharedTemplate", 0) != 0 ||
             json::getInt(payload, "acknowledgeWarnings", 0) != 0;
@@ -3047,7 +3047,7 @@ static void OnMenuPreviewDefaultOutfit(const char* js) {
             PositionPreviewCamera(actor);
         }
         SendUiResult("defaultPreview", result > 0, g_curSlot,
-            result > 0 ? "已恢复并预览目标默认状态" : "没有记录该目标的默认服装或已管理物品");
+            result > 0 ? "Target Default State Restored and Previewed" : "No default outfit or managed items were recorded for this target");
     });
 }
 
@@ -3062,7 +3062,7 @@ static void OnMenuCommitSavedStudioOutfit(const char*) {
             "studioCommit",
             kept,
             g_curSlot,
-            kept ? "已保留最后保存的套装" : "无法保留最后保存的套装");
+            kept ? "The last saved outfit was kept" : "Unable to keep the last saved outfit");
     });
 }
 
@@ -3412,11 +3412,11 @@ static OutfitTargetState CheckOutfitTargetState(RE::Actor* actor, [[maybe_unused
 static std::string OutfitTargetStateMessage(OutfitTargetState state) {
     switch (state) {
     case OutfitTargetState::kCombat:
-        return "战斗中不能换装";
+        return "Outfits cannot be changed during combat";
     case OutfitTargetState::kSceneControlled:
-        return "目标正由任务、场景或特殊动画控制，暂时不能换装";
+        return "The target is controlled by a quest, scene, or special animation and cannot change outfits now";
     case OutfitTargetState::kSharedTemplate:
-        return "这个 NPC 可能使用共享模板，换装可能影响其他同类 NPC";
+        return "This NPC may use a shared template; changing outfits could affect similar NPCs";
     default:
         return {};
     }
@@ -3977,7 +3977,7 @@ static std::string Summ(int s) {
 }
 
 // ======== Native Functions ========
-RE::BSFixedString OM_GetPluginVersion(std::monostate) { return "2.0 PREVIEW STUDIO TEST 41"; }
+RE::BSFixedString OM_GetPluginVersion(std::monostate) { return "2.0.4"; }
 RE::BSFixedString OM_GetSlotPath(std::monostate, int s) { return SlotPath(s).string().c_str(); }
 bool OM_IsMenuAvailable(std::monostate) { return GetModuleHandleW(L"PrismaUI_F4.dll") != nullptr; }
 bool OM_PreparePlayerPreview(std::monostate) {
@@ -4277,7 +4277,7 @@ RE::BSFixedString OM_GetSavedOutfitName(std::monostate, int slot) {
         return detail->second.name.c_str();
     }
     char label[32]{};
-    std::snprintf(label, sizeof(label), "套装 %03d", slot);
+    std::snprintf(label, sizeof(label), "Outfit %03d", slot);
     return label;
 }
 int OM_GetLastRandomSlot(std::monostate) { return g_lastRandSlot; }
@@ -5802,7 +5802,7 @@ static std::string StudioCategory(std::uint32_t slots, std::string_view displayN
         lowerName.find("lower") != std::string::npos ||
         lowerName.find("裙") != std::string::npos ||
         lowerName.find("裤") != std::string::npos ||
-        lowerName.find("下装") != std::string::npos) {
+        lowerName.find("Lower Body") != std::string::npos) {
         return "lower";
     }
     auto has = [slots](RE::BIPED_OBJECT slot) {
@@ -6526,7 +6526,7 @@ public:
             if (!actor) return;
             ClearExpiredBusyState();
             if (g_eqBusy || g_randBusy) {
-                RE::SendHUDMessage::ShowHUDMessage("换装操作正忙，请稍后重试", nullptr, true, true);
+                RE::SendHUDMessage::ShowHUDMessage("An outfit operation is busy. Try again shortly", nullptr, true, true);
                 return;
             }
             g_eqBusy = true;
@@ -6535,9 +6535,9 @@ public:
             g_eqBusy = false;
             g_eqBusySinceMs = 0;
             const std::string message = result > 0 ?
-                "已装备：" + (ReadSlotName(slot).empty() ?
-                    ("套装 " + std::to_string(slot)) : ReadSlotName(slot)) :
-                "换装失败";
+                "Equipped：" + (ReadSlotName(slot).empty() ?
+                    ("Outfit " + std::to_string(slot)) : ReadSlotName(slot)) :
+                "Outfit Change Failed";
             RE::SendHUDMessage::ShowHUDMessage(message.c_str(), nullptr, true, result <= 0);
         });
     }
@@ -6568,7 +6568,7 @@ public:
             const bool read = ReadSlot(slot, slotGender, resolvedItems, summary, &status);
             if (!read && status.RemovedCount() <= 0) {
                 RE::SendHUDMessage::ShowHUDMessage(
-                    "无法读取这个套装，原记录未修改",
+                    "Unable to read this outfit; the original record was not changed",
                     nullptr,
                     true,
                     true);
@@ -6577,7 +6577,7 @@ public:
             if (status.RemovedCount() > 0 &&
                 !PersistResolvedSlotRecords(slot, slotGender, resolvedItems, status)) {
                 RE::SendHUDMessage::ShowHUDMessage(
-                    "套装备份或清理失败，原记录未修改",
+                    "Outfit backup or cleanup failed; the original record was not changed",
                     nullptr,
                     true,
                     true);
@@ -6586,7 +6586,7 @@ public:
 
             if (!continueEquip) {
                 RE::SendHUDMessage::ShowHUDMessage(
-                    "已清理这个套装中的失效记录",
+                    "Missing records were removed from this outfit",
                     nullptr,
                     true,
                     false);
@@ -6594,7 +6594,7 @@ public:
             }
             if (resolvedItems.empty()) {
                 RE::SendHUDMessage::ShowHUDMessage(
-                    "失效记录已清理，这个套装已没有可穿戴内容",
+                    "Missing records were removed; this outfit has no wearable items left",
                     nullptr,
                     true,
                     true);
@@ -6606,7 +6606,7 @@ public:
             if (!actor) return;
             ClearExpiredBusyState();
             if (g_eqBusy || g_randBusy) {
-                RE::SendHUDMessage::ShowHUDMessage("换装操作正忙，请稍后重试", nullptr, true, true);
+                RE::SendHUDMessage::ShowHUDMessage("An outfit operation is busy. Try again shortly", nullptr, true, true);
                 return;
             }
             g_eqBusy = true;
@@ -6615,9 +6615,9 @@ public:
             g_eqBusy = false;
             g_eqBusySinceMs = 0;
             const std::string message = result > 0 ?
-                "已装备：" + (ReadSlotName(slot).empty() ?
-                    ("套装 " + std::to_string(slot)) : ReadSlotName(slot)) :
-                "换装失败";
+                "Equipped：" + (ReadSlotName(slot).empty() ?
+                    ("Outfit " + std::to_string(slot)) : ReadSlotName(slot)) :
+                "Outfit Change Failed";
             RE::SendHUDMessage::ShowHUDMessage(message.c_str(), nullptr, true, result <= 0);
         });
     }
@@ -6657,17 +6657,17 @@ static bool ShowDeferredMissingOutfitPrompt(
     auto* manager = RE::MessageMenuManager::GetSingleton();
     if (!manager || !actor) return false;
     const std::string body =
-        "发现 " + std::to_string(status.RemovedCount()) +
-        " 条失效的服装或改装记录。\n"
-        "无论选择哪一项，都只会清理当前套装中的失效记录，并保留恢复备份。\n"
-        "继续穿戴可能让角色只穿上剩余部分。";
+        std::to_string(status.RemovedCount()) +
+        " missing clothing or modification records were found.\n"
+        "Either choice removes only missing records from this outfit and keeps a recovery backup.\n"
+        "Continuing may leave the character wearing only the remaining items.";
     manager->Create(
-        "套装内容有缺失",
+        "Outfit Content Missing",
         body.c_str(),
         new DeferredMissingOutfitCallback(actor, slot, allowSharedTemplate),
         RE::WARNING_TYPES::kInGameMessage,
-        "继续穿",
-        "不穿了");
+        "Continue",
+        "Don't Equip");
     return true;
 }
 
@@ -6682,10 +6682,10 @@ static int EquipOutfitForActor(
         ShowDeferredOutfitPrompt(
             actor,
             slot,
-            "共享 NPC 提醒",
-            "这个 NPC 使用了共享模板。继续换装可能会让其他同类 NPC 一起发生变化。",
-            "继续换装",
-            "不换了");
+            "Shared NPC Warning",
+            "This NPC uses a shared template. Changing their outfit may also affect similar NPCs.",
+            "Continue",
+            "Cancel");
         return static_cast<int>(targetState);
     }
     if (targetState != OutfitTargetState::kAllowed) {
@@ -7005,7 +7005,7 @@ bool OM_ClearSlotData(std::monostate, int s) {
         WriteIndex();
         ClearActiveSlotReferences(s);
     }
-    if (g_menuOpen) SendUiResult("clear", ok, s, ok ? "管理槽位已清空" : "清空管理槽位失败");
+    if (g_menuOpen) SendUiResult("clear", ok, s, ok ? "Managed slot cleared" : "Failed to clear managed slot");
     return ok;
 }
 
