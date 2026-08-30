@@ -15,6 +15,8 @@
   avoiding repeated focus traversal during active scrolling.
 - Keep delayed focus recovery alive across large mouse-wheel bursts and
   refresh the live list after the scroll has settled.
+- Tighten the fixed quick-outfit panel around its ten-row layout so the
+  unused space above the shortcuts stays small and consistent in EN and CHS.
 
 ## 1.0.0 - NG release line
 
