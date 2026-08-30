@@ -1,0 +1,25 @@
+{
+  "modName": "OutfitManager",
+  "keybinds": [
+    {
+      "id": "OM_MenuHotkey",
+      "desc": "打开/关闭青空服装管理系统 NG",
+      "action": { "type": "CallGlobalFunction", "script": "OutfitManager", "function": "OnMcmMenuHotkey" }
+    },
+    {
+      "id": "OM_StudioHotkey",
+      "desc": "打开服装工作台",
+      "action": { "type": "CallGlobalFunction", "script": "OutfitManager", "function": "OnMcmStudioHotkey" }
+    },
+    {
+      "id": "OM_RandomHotkey",
+      "desc": "随机换装",
+      "action": { "type": "CallGlobalFunction", "script": "OutfitManager", "function": "OnMcmRandomHotkey" }
+    },
+    {
+      "id": "OM_QuickOutfitHotkey",
+      "desc": "快捷换装",
+      "action": { "type": "CallGlobalFunction", "script": "OutfitManager", "function": "OnMcmQuickOutfitHotkey" }
+    }
+  ]
+}

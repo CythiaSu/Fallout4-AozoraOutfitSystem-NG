@@ -1,3 +1,0 @@
-#include <F4SE/F4SE.h>
-
-// Plugin version, load, and query are declared in src/main.cpp.

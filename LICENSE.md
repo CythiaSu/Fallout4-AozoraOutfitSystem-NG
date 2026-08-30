@@ -1,4 +1,4 @@
-# Aozora Outfit System Non-Commercial License
+# Aozora Outfit Management System NG Non-Commercial License
 
 Copyright (c) 2026 AozoraCynthiA
 

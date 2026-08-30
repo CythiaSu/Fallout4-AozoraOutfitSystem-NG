@@ -1,174 +1,205 @@
-# Fallout 4 Aozora Outfit System
+# Fallout 4 Aozora Outfit System NG
 
-[![Stable Release](https://img.shields.io/badge/stable-2.0.5-20a05a)](https://github.com/CythiaSu/Fallout4-AozoraOutfitSystem)
-[![Languages](https://img.shields.io/badge/languages-CHS%20%7C%20EN-2f81f7)](https://github.com/CythiaSu/Fallout4-AozoraOutfitSystem/tree/main/CHS)
-[![Input](https://img.shields.io/badge/input-keyboard%20%2B%20gamepad-8b5cf6)](https://github.com/CythiaSu/Fallout4-AozoraOutfitSystem)
+![Stable](https://img.shields.io/badge/status-stable-2ea043)
+![Version](https://img.shields.io/badge/version-NG%201.0.0-58a6ff)
+![Languages](https://img.shields.io/badge/languages-CHS%20%7C%20EN-f0c36a)
+![Input](https://img.shields.io/badge/input-keyboard%20%7C%20mouse%20%7C%20gamepad-8957e5)
 
-> 青空的服装管理系统：面向 Fallout 4 的套装保存、预览、材质交换与玩家/NPC 换装工具
->
-> A native Fallout 4 F4SE outfit management system for saving, previewing, material workflows, and player/NPC outfit changes.
+## 简介 | Introduction
 
-暂时不支持最新的 Fallout 4 AE 版本（1.11.240）。
-The latest Fallout 4 AE version (1.11.240) is not supported at this time.
+**青空服装管理系统 NG** 是 Fallout 4 Aozora Outfit System 的次世代版本。
+它在原有版本基础上进行了大量更新与重构，当前正式版本为 **NG 1.0.0**。
 
+**Aozora Outfit System NG** is the next-generation version of Fallout 4 Aozora
+Outfit System. It contains a large set of updates and refactors over the
+previous version. The current stable release is **NG 1.0.0**.
 
-[OUTFIT] Outfit Slots · [PREVIEW] Outfit Studio · [MATERIAL] Material Swap · [NPC] Player/NPC · [INPUT] Keyboard/Gamepad
+项目对外名称升级为 NG，但为了保留已有套装数据和配置的兼容性，游戏内的
+插件、脚本、MCM 和数据目录标识仍保持为 `OutfitManager`。
 
-## 中文
+The public product name is now NG. For compatibility with existing outfit data
+and settings, the in-game plugin, scripts, MCM identifiers, and data directory
+still use `OutfitManager`.
 
-Aozora Outfit Management System 2.0.5 是由 Fallout4 Outfit Manager 全面升级而来的稳定版服装管理系统。
+## 核心功能 | Highlights
 
-项目包含 F4SE 原生插件、Papyrus 接口、Prisma UI 页面、MCM 配置和独立的中英文源码目录。
+| 功能 | 中文 | English |
+| --- | --- | --- |
+| 套装管理 | 保存、命名、清除、还原和切换最多 500 套服装 | Save, rename, clear, restore, and switch up to 500 outfits |
+| 工作台 | 直接管理当前穿着的服装、装备/卸下物品和材质 | Manage the current worn outfit, equip or unequip items, and edit materials |
+| 材质交换 | 预览材质并保存带有独立名称的材质版本 | Preview materials and save named material variants |
+| 目标 | 支持玩家和符合条件的人形 NPC | Supports the player and eligible humanoid NPCs |
+| 输入 | 键盘、鼠标和手柄；快捷换装与套装管理保留分页 | Keyboard, mouse, and gamepad; paging remains available where needed |
+| 焦点 | 键盘输入会接管鼠标焦点，鼠标移动后才回到鼠标焦点 | Keyboard input takes over from the mouse; mouse movement returns focus to the cursor |
+| 性能 | 减少重复渲染、无效刷新和不必要的资源复制 | Reduced redundant rendering, invalid redraws, and unnecessary asset duplication |
+| 光照 | 重做预览光照，室内/室外分别由 MCM 调整 | Rebuilt preview lighting with separate indoor/outdoor MCM controls |
+| 布局 | 16:9 与 16:10 布局；1080p 下优先完整显示 10 项，小屏保留滚动 | 16:9 and 16:10 layouts; 1080p prioritizes 10 visible entries, while smaller screens keep scrolling |
 
-### 主要功能
+## 次世代版本更新 | NG Updates
 
-标记 | 功能
---- | ---
-[ SLOT ] | 支持 500 个套装槽位，可保存、命名、清空、还原并切换上一套或下一套
-[ PREVIEW ] | 在玩家或符合条件的 NPC 身上预览套装，确认后才会正式换装
-[ STUDIO ] | 服装工作台默认关闭，可在 MCM 高级选项中开启
-[ MATERIAL ] | 主要支持使用 MSWP 记录的 MOD 服装材质交换与永久物品生成
-[ OMOD ] | 只要改装最终表现为基础物品加 OMOD 数据，就可以尝试保存和还原
-[ NPC ] | 支持玩家和符合条件的人形 NPC；仅过滤不支持穿衣的动物、怪物与机器人
-[ WEAPON ] | 可在 MCM 中单独开启武器保存，记录普通改装和传奇效果
-[ INPUT ] | 支持键盘和手柄；稳定版暂不启用鼠标操作
-[ LAYOUT ] | 提供 16:9 与 16:10 基准布局，21:9 沿用 16:9 高度缩放逻辑
+### 1. AE 1.11.240 支持 | AE 1.11.240 Support
 
-### 兼容范围
+NG 的原生插件已经按 Fallout 4 AE **1.11.240** 进行支持声明和构建适配。
+运行时必须同时使用与当前游戏版本匹配的 F4SE、Address Library、Prisma UI、
+MCM 和 GOE；不能混用 1.10.x 与 1.11.x 的前置文件。
 
-材质交换功能主要面向通过 MSWP 记录提供材质变体的 MOD 服装。
+The NG native plugin declares and builds for Fallout 4 AE **1.11.240**.
+Every prerequisite must match the installed game runtime: F4SE, Address
+Library, Prisma UI, MCM, and GOE. Do not mix 1.10.x and 1.11.x prerequisites.
 
-工作台或第三方系统的改装，只要最后是基础物品加 OMOD 数据，系统就可以尝试保存和还原。
+### 2. 更简单的操作与鼠标支持 | Simpler Controls and Mouse Support
 
-脚本驱动的改装、独立运行时数据和超出基础物品加 OMOD 范围的效果，无法保证正确还原。
+界面操作经过重新整理，键盘、鼠标和手柄使用同一套焦点状态逻辑。鼠标悬停
+可以建立焦点；之后键盘或手柄导航会接管焦点，只有鼠标再次移动到界面区域时
+才返回鼠标焦点，避免两个输入源同时制造两个选中项。
 
-武器保存会保留普通改装和传奇效果，可识别的 Fallout4.esm 独特或特殊效果会按照稳定版规则过滤。
+The interface uses one focus model for keyboard, mouse, and gamepad input. A
+mouse hover can establish focus; keyboard or gamepad navigation then takes over,
+and focus returns to the mouse only after the cursor moves over the interface.
+This prevents two input sources from creating competing selections.
 
-### 前置要求
+### 3. UI 性能优化 | UI Performance
 
-- Fallout 4
-- 与游戏版本匹配的 Fallout 4 Script Extender（F4SE）
-- Address Library for F4SE Plugins
-- Mod Configuration Menu（MCM）
-- Prisma UI Framework 2.0.3 或兼容的后续 2.x 版本
-- Garden of Eden Papyrus Script Extender（GOE）
+NG 对 Prisma UI 界面进行了性能整理，包括减少重复 DOM 更新、限制无效刷新、
+复用布局和资源、对异步状态更新进行保护，并在列表较长时保持必要的滚动能力。
 
-### 仓库结构
+NG improves the Prisma UI layer by reducing redundant DOM updates, avoiding
+invalid redraws, reusing layout and assets, guarding asynchronous state
+updates, and preserving scrolling only where a list actually needs it.
 
-~~~text
-CHS/2.0.5/      中文源码、Papyrus、UI 和 MCM 配置
-EN/2.0.5/       English source, Papyrus, UI, and MCM configuration
-tools/           UI 检查、布局验证和资源处理工具
-docs/            构建说明与稳定版范围说明
-~~~
+### 4. 光照重做与 MCM 调节 | Rebuilt Lighting with MCM Controls
 
-### 构建
+角色预览使用重新整理的临时世界光照。室内和室外光照分开配置，并在 MCM 中
+提供可调的预览强度；预览结束后会清理临时光照引用，避免影响正常游戏场景。
 
-原生插件使用 xmake.lua 和 CommonLibF4 构建，请从 CHS/2.0.5/Native 或 EN/2.0.5/Native 目录选择对应语言版本。
+Character previews use a rebuilt temporary world-lighting setup. Indoor and
+outdoor preview strength are configured separately in MCM, and temporary light
+references are cleaned up after preview use so normal world lighting is not
+affected.
 
-Papyrus 源码位于对应语言的 Papyrus/Source/User 目录，需要使用 Caprica 或兼容的 Fallout 4 Papyrus 编译器单独编译。
+## 兼容性 | Compatibility
 
-生成的 DLL、PEX、ESP、OBJ、LIB、编译缓存和发布专用辐射娘素材不包含在源码仓库中。
+### 必需前置 | Requirements
 
-更多构建说明见 [docs/BUILD.md](docs/BUILD.md)。
-
-## English
-
-Aozora Outfit Management System 2.0.5 is the stable full upgrade of Fallout4 Outfit Manager.
-
-The repository contains the native F4SE plugin source, Papyrus bindings, Prisma UI pages, MCM configuration, and separate CHS/EN source directories.
-
-### Features
-
-Marker | Feature
---- | ---
-[ SLOT ] | Up to 500 outfit slots with save, rename, clear, restore, previous, and next actions
-[ PREVIEW ] | Preview outfits on the player or eligible NPCs before confirming the change
-[ STUDIO ] | Disabled by default; enable Outfit Studio under MCM Advanced Options when needed
-[ MATERIAL ] | Material Swap preview and permanent item generation primarily for mod clothing using MSWP records
-[ OMOD ] | Workbench or third-party modifications can be restored when their final state is a base item plus OMOD data
-[ NPC ] | Player and eligible humanoid NPC management with only non-wearable animals, creatures, and robots filtered out
-[ WEAPON ] | Optional MCM weapon saving with standard modifications and legendary effects
-[ INPUT ] | Keyboard and gamepad support; mouse input is intentionally disabled in the stable release
-[ LAYOUT ] | Dedicated 16:9 and 16:10 baselines, with 21:9 reusing the 16:9 height scaling
-
-### Compatibility
-
-Material Swap is primarily designed for mod clothing that exposes material variants through MSWP records.
-
-Workbench or third-party modifications can be restored when the final item is represented by a base item plus OMOD data.
-
-Script-driven changes, custom runtime data, and effects outside the base-item-plus-OMOD model cannot be guaranteed to restore correctly.
-
-Weapon saving retains standard modifications and legendary effects, while recognizable unique or special Fallout4.esm effects are filtered according to the stable release rules.
-
-### Requirements
-
-- Fallout 4
-- Fallout 4 Script Extender (F4SE) matching the installed game runtime
-- Address Library for F4SE Plugins
+- Fallout 4 AE 1.11.240（或与你的游戏运行时对应的 NG 支持版本）
+- 与游戏版本匹配的 F4SE
+- 与游戏版本匹配的 Address Library for F4SE Plugins
+- 与当前运行时匹配的 Prisma UI Framework
 - Mod Configuration Menu (MCM)
-- Prisma UI Framework 2.0.3 or a compatible later 2.x version
 - Garden of Eden Papyrus Script Extender (GOE)
 
-### Repository Structure
+- Fallout 4 AE 1.11.240, or another NG-supported runtime matching your game
+- F4SE matching the installed runtime
+- Address Library for F4SE Plugins matching the installed runtime
+- Prisma UI Framework matching the installed runtime
+- Mod Configuration Menu (MCM)
+- Garden of Eden Papyrus Script Extender (GOE)
 
-~~~text
-CHS/2.0.5/      Chinese source, Papyrus, UI, and MCM configuration
-EN/2.0.5/       English source, Papyrus, UI, and MCM configuration
-tools/           UI checks, layout validation, and asset utilities
-docs/            Build instructions and stable release scope
-~~~
+请只安装一个语言版本。CHS 和 EN 的程序结构一致，区别主要在 UI、MCM 和
+Papyrus 文本；不要同时启用两个语言包，也不要与旧版 OutfitManager 并装。
 
-### Build
+Install only one language package. CHS and EN share the same program structure
+and differ mainly in UI, MCM, and Papyrus text. Do not enable both language
+packages or install an older OutfitManager package alongside NG.
 
-Build the native plugin with xmake.lua and CommonLibF4 from either CHS/2.0.5/Native or EN/2.0.5/Native.
+### 数据标识 | Data Identifiers
 
-Compile the Papyrus sources under the selected language's Papyrus/Source/User directory with Caprica or a compatible Fallout 4 Papyrus compiler.
+为了保留已有数据兼容性，以下标识保持不变：
 
-Generated DLL, PEX, ESP, OBJ, LIB, build caches, and release-only mascot assets are intentionally excluded from this source repository.
+The following identifiers remain unchanged for data compatibility:
 
-See [docs/BUILD.md](docs/BUILD.md) for the build workflow.
+- Plugin: `OutfitManager.esp`
+- Native plugin: `OutfitManager.dll`
+- Papyrus scripts: `OutfitManager`, `OMNative`, and controller scripts
+- MCM identifiers and settings paths: `OutfitManager`
+- Shared outfit data directory: `F4SE/Plugins/OutfitManager`
 
-## Screenshots / 界面预览
+## 安装 | Installation
 
-### Main Page / 主页面
+1. 安装全部对应当前 Fallout 4 运行时的前置。
+2. 在 MO2 中安装 `Aozora_Outfit_Management_System_NG_1.0.0_CHS.7z` 或
+   `Aozora_Outfit_Management_System_NG_1.0.0_EN.7z`。
+3. 只选择一个语言版本，并确认它位于相关前置之后。
+4. 启动游戏后先确认 MCM 已加载，再使用快捷键或工作台入口。
 
-<img src="docs/images/main-page.jpg" alt="Aozora Outfit System main page / 青空的服装管理系统主页面" width="720">
+1. Install all prerequisites matching the current Fallout 4 runtime.
+2. Install either `Aozora_Outfit_Management_System_NG_1.0.0_CHS.7z` or
+   `Aozora_Outfit_Management_System_NG_1.0.0_EN.7z` through MO2.
+3. Choose one language package and place it after the required frameworks.
+4. Start the game, confirm that MCM has loaded, then use the hotkeys or
+   workbench entry points.
 
-### Outfit Management / 套装管理
+## 仓库结构 | Repository Layout
 
-<img src="docs/images/outfit-management.jpg" alt="Aozora Outfit System outfit management / 青空的服装管理系统套装管理" width="720">
+```text
+EN/1.0.0/      English native, Papyrus, UI, and MCM source
+CHS/1.0.0/     Simplified Chinese native, Papyrus, UI, and MCM source
+docs/           Build notes, release scope, and README screenshots
+tools/          Source validation and asset-processing utilities
+```
 
-### Outfit Studio / 服装工作台
+源码仓库遵循原项目的发布边界，不提交编译生成的 DLL、PEX、ESP、构建缓存和
+日志。可直接发布给玩家的 CHS/EN 安装包作为独立 Release 产物维护。
 
-<img src="docs/images/outfit-studio.jpg" alt="Aozora Outfit System outfit studio / 青空的服装管理系统工作台" width="720">
+Following the original project boundary, this source repository does not track
+generated DLL, PEX, ESP, build caches, or logs. The ready-to-install CHS/EN
+archives are maintained as separate release artifacts.
 
-### MCM General Settings / MCM 通用设置
+## 构建 | Build
 
-<img src="docs/images/mcm-general-settings.jpg" alt="Aozora Outfit System MCM general settings / 青空的服装管理系统 MCM 通用设置" width="720">
+原生插件使用 x64 Visual Studio 工具链与 CommonLibF4 构建；进入对应语言的
+`Native` 目录后执行：
 
-## License / 许可
+The native plugin uses the x64 Visual Studio toolchain and CommonLibF4. From the
+selected language's `Native` directory, run:
 
-This project is released under the Aozora Outfit System Non-Commercial License.
+```powershell
+xmake build -y
+```
 
-本项目采用《青空服装管理系统非商业许可》发布。
+Papyrus 源码位于 `Papyrus/Source/User`，使用 Caprica 或兼容的 Fallout 4
+Papyrus 编译器编译。完整的源码、构建和打包说明见
+[docs/BUILD.md](docs/BUILD.md)。
 
-Allowed without separate permission / 无需单独许可 | Requires prior permission / 需要事先许可
---- | ---
-Personal use, modification, and private builds / 个人使用、修改和私有构建 | Commercial use or monetized distribution / 商业使用或商业化分发
-Public or private forks / 公开或私有分支 | Paid mod packs or paid bundling / 付费整合包或付费打包
-Non-commercial patches and mod packs / 非商业补丁和整合包 | Paid support or commissioned maintenance / 付费支持或有偿维护
-Redistribution of modified or compiled builds / 修改版或编译版再发布 | Selling modified or compiled versions / 销售修改版或编译版
+Papyrus sources are under `Papyrus/Source/User`; compile them with Caprica or
+another compatible Fallout 4 Papyrus compiler. See [docs/BUILD.md](docs/BUILD.md)
+for the complete source, build, and packaging workflow.
 
-Please retain the original author and repository attribution, include a copy of LICENSE.md, and clearly mark substantial changes in derivative versions.
+## 界面预览 | Screenshots
 
-请保留原作者与仓库来源说明，附带 LICENSE.md，并在衍生版本中明确标注重要改动。
+### 主界面 | Main Menu
 
-The software is provided as-is, without warranty. The author is not responsible for problems caused by modified builds or third-party redistribution.
+![Main Menu](docs/images/main-menu.png)
 
-本项目按“现状”提供，不提供任何保证。修改版或第三方再分发造成的问题，由使用者和再发布者自行负责。
+### 套装管理 | Manage Outfits
 
-See [LICENSE.md](LICENSE.md) for the complete bilingual license text.
+![Manage Outfits](docs/images/manage-outfits.png)
 
-完整的双语许可条款请参阅 [LICENSE.md](LICENSE.md)。
+### 材质交换 | Material Swap
+
+![Material Swap](docs/images/material-swap.png)
+
+### MCM 设置 | MCM Settings
+
+![MCM](docs/images/mcm.png)
+
+### 工作台 | Outfit Studio
+
+![Outfit Studio](docs/images/outfit-studio.png)
+
+### 快速换装 | Quick Outfit Switcher
+
+![Quick Outfit Switcher](docs/images/quick-outfit-switcher.png)
+
+### 目标选择 | Select Target
+
+![Select Target](docs/images/select-target.png)
+
+## 许可证 | License
+
+本项目使用 [Aozora Outfit Management System NG Non-Commercial License](LICENSE.md)。
+该许可证允许个人非商业使用、修改和再发布，但禁止未经许可的商业使用。
+
+This project is released under the [Aozora Outfit Management System NG
+Non-Commercial License](LICENSE.md). Personal non-commercial use, modification,
+and redistribution are allowed; commercial use requires permission.
