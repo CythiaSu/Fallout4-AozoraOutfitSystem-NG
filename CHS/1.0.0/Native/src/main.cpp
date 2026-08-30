@@ -1234,8 +1234,8 @@ public:
             }
             if (std::abs(y) >= kDeadZone) {
                 InvokeGamepadMenuScript(y > 0.0F ?
-                    "if(window.omScrollItems)window.omScrollItems(-22,true);" :
-                    "if(window.omScrollItems)window.omScrollItems(22,true);");
+                    "if(window.omScrollItems)window.omScrollItems(-48,true);" :
+                    "if(window.omScrollItems)window.omScrollItems(48,true);");
                 lastThumbScrollMs_ = now;
             }
             return;

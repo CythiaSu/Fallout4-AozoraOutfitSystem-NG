@@ -9,6 +9,8 @@
   survives PrismaUI view destruction and recreation.
 - Delay focus placement after mouse-wheel and right-stick scrolling until the
   scroll settles, then focus the first visible selectable item once.
+- Prefer a fully visible item for delayed focus, retry after DOM refreshes, and
+  increase right-stick scrolling from 22px to 48px per input step.
 
 ## 1.0.0 - NG release line
 

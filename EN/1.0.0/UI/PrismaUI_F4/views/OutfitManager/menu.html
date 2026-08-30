@@ -1884,6 +1884,7 @@
     let marqueeElement = null;
     let scrollFocusTimer = 0;
     let scrollFocusTarget = null;
+    let scrollFocusRetryCount = 0;
     const SCROLL_FOCUS_IDLE_MS = 500;
     function chooseHomeMascotGroup() {
       let next = Math.floor(Math.random() * 3) + 1;
@@ -2467,15 +2468,27 @@
       clearTimeout(scrollFocusTimer);
       scrollFocusTimer = 0;
       scrollFocusTarget = null;
+      scrollFocusRetryCount = 0;
     }
 
     function firstVisibleScrollableItem(scroller, selector) {
       if (!scroller) return null;
       const view = scroller.getBoundingClientRect();
-      return Array.from(scroller.querySelectorAll(selector)).find(candidate => {
+      const candidates = Array.from(scroller.querySelectorAll(selector));
+      const fullyVisible = candidates.find(candidate => {
         const rect = candidate.getBoundingClientRect();
-        return rect.bottom > view.top + 1 && rect.top < view.bottom - 1;
-      }) || null;
+        return rect.top >= view.top + 2 && rect.bottom <= view.bottom - 2;
+      });
+      if (fullyVisible) return fullyVisible;
+      return candidates.map(candidate => {
+        const rect = candidate.getBoundingClientRect();
+        const visibleTop = Math.max(rect.top, view.top);
+        const visibleBottom = Math.min(rect.bottom, view.bottom);
+        const visible = Math.max(0, visibleBottom - visibleTop);
+        return { candidate, visible, centerDistance: Math.abs((rect.top + rect.bottom) / 2 - (view.top + view.bottom) / 2) };
+      }).filter(entry => entry.visible > 0).sort((left, right) =>
+        right.visible - left.visible || left.centerDistance - right.centerDistance
+      )[0]?.candidate || null;
     }
 
     function focusVisibleSaveTarget() {
@@ -2489,10 +2502,23 @@
       restartFocusedMarquee();
     }
 
+    function resolveCurrentScrollFocusTarget() {
+      if (state.selectingSaveTarget) return saveTargetList;
+      const liveFocusables = Array.from(content.querySelectorAll(".focusable"));
+      const focused = liveFocusables[state.focusIndex];
+      const scrollers = Array.from(content.querySelectorAll(".scroll"));
+      return state.mode === "slots"
+        ? content.querySelector(".outfit-items.scroll")
+        : ((focused && focused.closest(".scroll")) || scrollers[scrollers.length - 1] || null);
+    }
+
     function finishScrollFocusSync() {
-      const scroller = scrollFocusTarget;
+      let scroller = scrollFocusTarget;
       scrollFocusTimer = 0;
       scrollFocusTarget = null;
+      if (!scroller || !document.contains(scroller)) {
+        scroller = resolveCurrentScrollFocusTarget();
+      }
       if (!scroller || !document.contains(scroller)) return;
       if (state.selectingSaveTarget) {
         scrollFocusTarget = scroller;
@@ -2500,14 +2526,29 @@
         scrollFocusTarget = null;
         return;
       }
+      // A delayed callback can run after a page refresh replaced the list.
+      // Re-read the live focusable nodes before resolving the visible item.
+      focusables = Array.from(content.querySelectorAll(".focusable"));
       const target = firstVisibleScrollableItem(scroller, ".focusable");
       const index = focusables.indexOf(target);
-      if (index >= 0) setFocus(index);
+      if (index >= 0) {
+        scrollFocusRetryCount = 0;
+        setFocus(index);
+        return;
+      }
+      if (scrollFocusRetryCount < 3) {
+        scrollFocusRetryCount += 1;
+        scrollFocusTarget = scroller;
+        scrollFocusTimer = setTimeout(finishScrollFocusSync, 80);
+      } else {
+        scrollFocusRetryCount = 0;
+      }
     }
 
     function scheduleScrollFocusSync(scroller) {
       if (!scroller) return;
       scrollFocusTarget = scroller;
+      scrollFocusRetryCount = 0;
       clearTimeout(scrollFocusTimer);
       scrollFocusTimer = setTimeout(finishScrollFocusSync, SCROLL_FOCUS_IDLE_MS);
     }
