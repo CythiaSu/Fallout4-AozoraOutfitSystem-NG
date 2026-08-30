@@ -1813,7 +1813,7 @@
     let scrollFocusTimer = 0;
     let scrollFocusTarget = null;
     let scrollFocusRetryCount = 0;
-    const SCROLL_FOCUS_IDLE_MS = 500;
+    const SCROLL_FOCUS_IDLE_MS = 400;
     function chooseHomeMascotGroup() {
       let next = Math.floor(Math.random() * 3) + 1;
       if (next === lastHomeMascotGroup) next = (next % 3) + 1;

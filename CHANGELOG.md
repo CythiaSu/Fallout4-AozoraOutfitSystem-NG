@@ -11,6 +11,8 @@
   scroll settles, then focus the first visible selectable item once.
 - Prefer a fully visible item for delayed focus, retry after DOM refreshes, and
   increase right-stick scrolling from 22px to 48px per input step.
+- Use a 400ms scroll-idle delay so focus recovery feels more responsive while
+  avoiding repeated focus traversal during active scrolling.
 
 ## 1.0.0 - NG release line
 
