@@ -1820,6 +1820,7 @@
       lastSaveSource: "",
       quickOutfitMode: false,
       quickOutfitSlot: 0,
+      quickOutfitPage: 0,
       directStudioMode: false,
       quickSaveMode: false,
       quickSaveSlot: 0,
@@ -3207,6 +3208,7 @@
       const entries = quickOutfitEntries();
       const pageCount = Math.max(1, Math.ceil(entries.length / QUICK_VISIBLE_ROWS));
       state.saveTargetPage = Math.max(0, Math.min(pageCount - 1, state.saveTargetPage));
+      state.quickOutfitPage = state.saveTargetPage;
       const pageStart = state.saveTargetPage * QUICK_VISIBLE_ROWS;
       const pageEntries = entries.slice(pageStart, pageStart + QUICK_VISIBLE_ROWS);
       const pageLength = pageEntries.length;
@@ -3264,21 +3266,23 @@
     function chooseQuickOutfit(slot = activeQuickOutfitSlot()) {
       const info = slotInfo(slot);
       if (!info.hasData) return;
+      const closePayload = quickOutfitPagePayload();
       state.quickOutfitSlot = Number(slot);
       state.quickOutfitMode = false;
       hideQuickOutfitHint();
       closeSaveTargetDialog();
       beginClosingUi();
       nativeCall("onOutfitManagerRestore", { slot: state.quickOutfitSlot, targetId: state.targetId });
-      nativeCall("onOutfitManagerClose", {});
+      nativeCall("onOutfitManagerClose", closePayload);
     }
 
     function runQuickOutfitRandom() {
       if (state.quickOutfitMode && quickOutfitEntries().length) {
+        const closePayload = quickOutfitPagePayload();
         hideQuickOutfitHint();
         beginClosingUi();
         nativeCall("onOutfitManagerRandom", { slot: 0, targetId: state.targetId });
-        nativeCall("onOutfitManagerClose", {});
+        nativeCall("onOutfitManagerClose", closePayload);
       } else if (state.quickOutfitMode) showQuickOutfitHint();
     }
 
@@ -3301,11 +3305,18 @@
       document.body.classList.remove("quick-outfit-empty-state");
     }
 
+    function quickOutfitPagePayload() {
+      const page = Math.max(0, Number(state.saveTargetPage) || 0);
+      state.quickOutfitPage = page;
+      return { quickOutfitPage: page };
+    }
+
     function closeQuickOutfitCancel() {
+      const closePayload = quickOutfitPagePayload();
       state.quickOutfitMode = false;
       hideQuickOutfitHint();
       closeSaveTargetDialog();
-      requestMenuClose();
+      requestMenuClose(closePayload);
     }
 
     function renderSaveTargets() {
@@ -3349,7 +3360,7 @@
 
     function openQuickOutfitDialog() {
       state.selectingSaveTarget = true;
-      state.saveTargetPage = 0;
+      state.saveTargetPage = Math.max(0, Number(state.quickOutfitPage) || 0);
       state.saveTargetIndex = -1;
       state.quickOutfitSlot = 0;
       setDialogMascot("saveTargetMascot", "question");
@@ -3519,9 +3530,9 @@
       forcePaintPulse(8);
     }
 
-    function requestMenuClose() {
+    function requestMenuClose(payload = {}) {
       beginClosingUi();
-      nativeCall("onOutfitManagerClose", {});
+      nativeCall("onOutfitManagerClose", payload);
     }
 
     function backOrClose() {
@@ -4123,6 +4134,7 @@
       state.quickSaveMode = state.quickSaveSlot > 0;
       state.quickOutfitMode = incoming.quickOutfitMode === true;
       state.directStudioMode = incoming.directStudioMode === true;
+      state.quickOutfitPage = Math.max(0, Number(incoming.quickOutfitPage) || 0);
       state.quickOutfitSlot = 0;
       document.body.classList.toggle("quick-save-mode", state.quickSaveMode);
       document.body.classList.toggle("quick-outfit-mode", state.quickOutfitMode);

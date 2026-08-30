@@ -1,6 +1,6 @@
 # Build Guide
 
-This document describes the NG `1.0.0` source tree. The repository does not
+This document describes the NG `1.0.1` source tree. The repository does not
 vendor the large CommonLibF4 dependency or generated Fallout 4 binaries.
 
 ## Native plugin

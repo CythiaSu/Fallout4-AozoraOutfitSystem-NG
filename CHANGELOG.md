@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.0.1
+
+- Remember the last Quick Outfit Switcher page between openings.
+- Preserve the page when switching to frequency-based sorting, while reopening
+  without a focus so the reordered list cannot select the wrong outfit.
+- Store the remembered quick-outfit page in the native session state so it
+  survives PrismaUI view destruction and recreation.
+
 ## 1.0.0 - NG release line
 
 - Started the Aozora Outfit Management System NG version line.

@@ -234,6 +234,7 @@ static bool g_menuOpen = false;
 static bool g_hiddenBehindGameMenu = false;
 static bool g_quickSaveMode = false;
 static bool g_quickOutfitMode = false;
+static int g_quickOutfitPage = 0;
 static bool g_directStudioMode = false;
 static int g_quickSaveSlot = 0;
 static bool g_viewReady = false;
@@ -3495,8 +3496,13 @@ static void OnMenuPreviewDefaultOutfit(const char* js) {
     });
 }
 
-static void OnMenuClose(const char*) {
-    QueueGameTask([] { ++g_previewRequestSerial; CloseMenuInternal(false); });
+static void OnMenuClose(const char* js) {
+    const int quickOutfitPage = js ? json::getInt(js, "quickOutfitPage", -1) : -1;
+    QueueGameTask([quickOutfitPage] {
+        if (quickOutfitPage >= 0) g_quickOutfitPage = (std::max)(0, quickOutfitPage);
+        ++g_previewRequestSerial;
+        CloseMenuInternal(false);
+    });
 }
 static void OnMenuCommitSavedStudioOutfit(const char*) {
     QueueGameTask([] {
@@ -3635,6 +3641,7 @@ static void ResetTransientSessionForLoad(bool restoreOldWorld) {
     g_quickOutfitMode = false;
     g_directStudioMode = false;
     g_quickSaveSlot = 0;
+    g_quickOutfitPage = 0;
     g_menuAct = 0;
     g_menuActSlot = 0;
     g_menuTarget = {};
@@ -4710,7 +4717,7 @@ static std::string Summ(int s) {
 }
 
 // ======== Native Functions ========
-RE::BSFixedString OM_GetPluginVersion(std::monostate) { return "1.0.0"; }
+RE::BSFixedString OM_GetPluginVersion(std::monostate) { return "1.0.1"; }
 RE::BSFixedString OM_GetSlotPath(std::monostate, int s) { return SlotPath(s).string().c_str(); }
 bool OM_IsMenuAvailable(std::monostate) { return GetModuleHandleW(L"PrismaUI_F4.dll") != nullptr; }
 bool OM_PreparePlayerPreview(std::monostate) {
@@ -4887,6 +4894,7 @@ static bool OpenMenuInternal(
                         ",\"maxSlot\":" + std::to_string(MAX_SLOTS) +
                         ",\"quickSaveSlot\":" + std::to_string(g_quickSaveSlot) +
                         ",\"quickOutfitMode\":" + (g_quickOutfitMode ? "true" : "false") +
+                        ",\"quickOutfitPage\":" + std::to_string(g_quickOutfitPage) +
                         ",\"directStudioMode\":" + (g_directStudioMode ? "true" : "false") +
                         ",\"targetName\":\"" + json::esc(nm) +
                         "\",\"targetGender\":" + std::to_string(sex) +

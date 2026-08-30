@@ -3,7 +3,7 @@ set_xmakever("3.0.0")
 
 -- set project constants
 set_project("OutfitManager")
-set_version("1.0.0")
+set_version("1.0.1")
 set_arch("x64")
 set_languages("c++23")
 set_warnings("allextra")
@@ -29,4 +29,5 @@ target("OutfitManager", function()
 
     -- add include directories
     add_includedirs("src")
+    add_includedirs("../commonlibf4-frakkin64/lib/commonlib-shared/include")
 end)

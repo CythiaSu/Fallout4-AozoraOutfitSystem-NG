@@ -1,6 +1,6 @@
-# NG 1.0.0 Release Scope
+# NG 1.0.1 Release Scope
 
-This repository contains only the Aozora Outfit Management System NG `1.0.0`
+This repository contains only the Aozora Outfit Management System NG `1.0.1`
 source baseline. It is the new public version line after the substantial
 changes made since the former 2.0.4 release.
 
