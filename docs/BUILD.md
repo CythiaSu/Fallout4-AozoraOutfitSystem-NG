@@ -1,6 +1,6 @@
 # Build Guide
 
-This document describes the NG `1.0.1` build using the existing `1.0.0`
+This document describes the NG `1.0.1` build using the `1.0.1`
 language source layout. The repository does not
 vendor the large CommonLibF4 dependency or generated Fallout 4 binaries.
 
@@ -10,7 +10,7 @@ vendor the large CommonLibF4 dependency or generated Fallout 4 binaries.
    Visual Studio toolchain.
 2. Place the CommonLibF4 source tree beside the selected `Native` directory at
    `../commonlibf4-frakkin64`.
-3. Open either `CHS/1.0.0/Native` or `EN/1.0.0/Native`.
+3. Open either `CHS/1.0.1/Native` or `EN/1.0.1/Native`.
 4. Build with the repository's `xmake.lua`:
 
    ```powershell

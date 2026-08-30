@@ -71,8 +71,8 @@
 ### 仓库结构
 
 ~~~text
-EN/1.0.0/      英文原生插件、Papyrus、UI 和 MCM 源码
-CHS/1.0.0/     简体中文原生插件、Papyrus、UI 和 MCM 源码
+EN/1.0.1/      英文原生插件、Papyrus、UI 和 MCM 源码
+CHS/1.0.1/     简体中文原生插件、Papyrus、UI 和 MCM 源码
 docs/           构建说明、发布范围和 README 图片
 tools/          源码验证及素材处理工具
 ~~~
@@ -192,8 +192,8 @@ can continue to work:
 ### Repository Layout
 
 ~~~text
-EN/1.0.0/      English native plugin, Papyrus, UI, and MCM source
-CHS/1.0.0/     Simplified Chinese native plugin, Papyrus, UI, and MCM source
+EN/1.0.1/      English native plugin, Papyrus, UI, and MCM source
+CHS/1.0.1/     Simplified Chinese native plugin, Papyrus, UI, and MCM source
 docs/           Build notes, release scope, and README screenshots
 tools/          Source validation and asset-processing utilities
 ~~~
