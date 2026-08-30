@@ -1199,6 +1199,7 @@ public:
     void OnThumbstickEvent(const RE::ThumbstickEvent* event) override {
         if (!event) return;
         if (!g_menuOpen || g_hiddenBehindGameMenu) {
+            leftThumbstickLatched_ = false;
             if (!g_menuOpen && IsCloseInputGuardActive() && !BlockingGameMenuOpen()) {
                 auto* mutableEvent = const_cast<RE::ThumbstickEvent*>(event);
                 mutableEvent->xValue = 0.0F;
@@ -1209,6 +1210,7 @@ public:
         }
 
         constexpr float kDeadZone = 0.55F;
+        constexpr float kReleaseZone = 0.35F;
         const auto now = GetTickCount64();
 
         const float x = event->xValue;
@@ -1218,6 +1220,10 @@ public:
         mutableEvent->yValue = 0.0F;
         mutableEvent->handled = RE::InputEvent::HANDLED_RESULT::kStop;
 
+        if (event->QIDCode() == RE::ThumbstickEvent::kLeft &&
+            std::abs(x) < kReleaseZone && std::abs(y) < kReleaseZone) {
+            leftThumbstickLatched_ = false;
+        }
         if (std::abs(x) < kDeadZone && std::abs(y) < kDeadZone) {
             return;
         }
@@ -1238,7 +1244,7 @@ public:
         if (event->QIDCode() != RE::ThumbstickEvent::kLeft) {
             return;
         }
-        if (now - lastThumbMoveMs_ < 120) {
+        if (leftThumbstickLatched_) {
             return;
         }
 
@@ -1251,7 +1257,7 @@ public:
                 "if(window.omSlotPage)window.omSlotPage(-1);" :
                 "if(window.omSlotPage)window.omSlotPage(1);");
         }
-        lastThumbMoveMs_ = now;
+        leftThumbstickLatched_ = true;
     }
 
     void OnButtonEvent(const RE::ButtonEvent* event) override {
@@ -1394,7 +1400,7 @@ private:
     // VK_OEM_3 (`~` / backtick), Fallout 4's default console toggle key.
     static constexpr std::int32_t kConsoleVirtualKeyCode = 0xC0;
     static constexpr ULONGLONG kRotateRepeatMs = 100;
-    ULONGLONG lastThumbMoveMs_ = 0;
+    bool leftThumbstickLatched_ = false;
     ULONGLONG lastThumbScrollMs_ = 0;
     ULONGLONG lastRotateInputMs_ = 0;
 };
