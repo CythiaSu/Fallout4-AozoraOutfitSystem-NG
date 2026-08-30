@@ -1584,7 +1584,7 @@
     @keyframes qopSlideIn { from { opacity: 0; transform: translateX(28px); } to { opacity: 1; transform: translateX(0); } }
     body.quick-outfit-mode > .app { display: none !important; visibility: hidden !important; }
     body.quick-outfit-mode .footer { display: none !important; }
-    body.quick-outfit-mode { --qop-card-width: min(460px, 42vw); --qop-card-height: min(70vh, 660px); --qop-card-half: calc(var(--qop-card-height) / 2); --qop-right-gap: clamp(24px, 4vw, 80px); --qop-hint-width: min(280px, calc(var(--qop-card-width) - 20px)); }
+    body.quick-outfit-mode { --qop-card-width: min(460px, 42vw); --qop-card-height: min(70vh, 680px); --qop-card-half: calc(var(--qop-card-height) / 2); --qop-right-gap: clamp(24px, 4vw, 80px); --qop-hint-width: min(280px, calc(var(--qop-card-width) - 20px)); }
     #saveTargetDialog[data-kind="quick"] { align-items: center; justify-content: flex-end; padding: clamp(8px, 1.5vh, 18px) var(--qop-right-gap); background: transparent !important; }
     #saveTargetDialog[data-kind="quick"] .dialog-mascot { display: none !important; }
     #saveTargetDialog[data-kind="quick"] .save-target-card { width: var(--qop-card-width) !important; height: var(--qop-card-height) !important; max-height: var(--qop-card-height) !important; margin-left: 0 !important; padding: clamp(14px, 1.6vw, 20px) !important; overflow: hidden !important; display: flex; flex-direction: column; animation: qopSlideIn 180ms ease-out both; }
@@ -1617,11 +1617,11 @@
     body.quick-outfit-empty-state .top-assistant img { position: static !important; display: block !important; width: 72px !important; max-height: 96px !important; object-fit: contain; }
     body.quick-outfit-empty-state .top-assistant-bubble { flex: 1 1 auto; white-space: nowrap !important; }
     @media (max-aspect-ratio: 17/10) {
-      body.quick-outfit-mode { --qop-card-width: min(460px, calc(100vw - 80px)); --qop-card-height: min(70vh, 660px); --qop-card-half: calc(var(--qop-card-height) / 2); --qop-right-gap: clamp(24px, 4vw, 70px); --qop-hint-width: min(270px, calc(var(--qop-card-width) - 20px)); }
+      body.quick-outfit-mode { --qop-card-width: min(460px, calc(100vw - 80px)); --qop-card-height: min(70vh, 680px); --qop-card-half: calc(var(--qop-card-height) / 2); --qop-right-gap: clamp(24px, 4vw, 70px); --qop-hint-width: min(270px, calc(var(--qop-card-width) - 20px)); }
       body.quick-outfit-mode .top-assistant-bubble { max-width: none !important; font-size: clamp(13px, 1.2vw, 16px) !important; }
     }
     @media (min-aspect-ratio: 2/1) {
-      body.quick-outfit-mode { --qop-card-width: min(500px, calc(100vw - 260px)); --qop-card-height: min(70vh, 660px); --qop-card-half: calc(var(--qop-card-height) / 2); --qop-right-gap: clamp(42px, 5vw, 100px); --qop-hint-width: min(280px, calc(var(--qop-card-width) - 20px)); }
+      body.quick-outfit-mode { --qop-card-width: min(500px, calc(100vw - 260px)); --qop-card-height: min(70vh, 680px); --qop-card-half: calc(var(--qop-card-height) / 2); --qop-right-gap: clamp(42px, 5vw, 100px); --qop-hint-width: min(280px, calc(var(--qop-card-width) - 20px)); }
     }
     @media (max-aspect-ratio: 3/2) {
       body.quick-outfit-mode { --qop-card-width: min(440px, calc(100vw - 28px)); --qop-card-height: min(70vh, 620px); --qop-card-half: calc(var(--qop-card-height) / 2); --qop-right-gap: 28px; --qop-hint-width: min(250px, calc(var(--qop-card-width) - 20px)); }

@@ -17,6 +17,8 @@
   refresh the live list after the scroll has settled.
 - Tighten the fixed quick-outfit panel around its ten-row layout so the
   unused space above the shortcuts stays small and consistent in EN and CHS.
+- Raise the fixed quick-outfit panel slightly so the tenth Chinese outfit row
+  remains fully visible at 16:9 1080p.
 
 ## 1.0.0 - NG release line
 
