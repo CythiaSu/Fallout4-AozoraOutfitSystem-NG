@@ -1,0 +1,9 @@
+{
+  "globalScale": 100,
+  "titleScale": 100,
+  "bodyScale": 100,
+  "menuScale": 100,
+  "auxiliaryScale": 100,
+  "footerScale": 100,
+  "说明": "全局缩放保留为统一入口；各页面最终字号直接写在对应 ui-layout 预设中。首次打开由轻量等待页承接必要的数据初始化，不再后台预热文件。"
+}

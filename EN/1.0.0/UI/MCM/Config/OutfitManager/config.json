@@ -1,0 +1,78 @@
+{
+  "modName": "OutfitManager",
+  "displayName": "Aozora Outfit Management System NG",
+  "minMcmVersion": 1,
+  "pluginRequirements": ["OutfitManager.esp"],
+  "content": [
+    { "type": "section", "text": "System Status" },
+    { "type": "text", "text": "Aozora Outfit Management System NG · Outfit saving, instant dressing, material customization, and character management" },
+    { "type": "section", "text": "About This Mod" },
+    { "type": "text", "text": "NG release line rebuilt from the post-2.0.4 system with a direct-commit model: selecting an outfit or changing an item in the studio immediately changes the character's worn outfit." },
+    { "type": "text", "text": "Save, equip, and edit outfits for the player and NPCs; closing the menu or studio keeps the character's current worn state." },
+    { "type": "text", "text": "Plugin files, MCM identifiers, and data folders retain the OutfitManager name for compatibility with existing settings and outfits." }
+  ],
+  "pages": [
+    {
+      "pageDisplayName": "Hotkeys",
+      "content": [
+        { "type": "section", "text": "Quick Actions" },
+        { "id": "OM_MenuHotkey", "type": "hotkey", "text": "Open/Close Management System", "help": "Open or close Aozora Outfit Management System NG.", "valueOptions": { "allowModifierKeys": true } },
+        { "id": "OM_StudioHotkey", "type": "hotkey", "text": "Open Outfit Studio", "help": "Open the Outfit Studio directly for the current target.", "valueOptions": { "allowModifierKeys": true } },
+        { "id": "OM_RandomHotkey", "type": "hotkey", "text": "Random Outfit", "help": "Equip the current target with a random saved outfit matching their gender.", "valueOptions": { "allowModifierKeys": true } },
+        { "id": "OM_QuickOutfitHotkey", "type": "hotkey", "text": "Quick Outfit Switcher", "help": "Open the simple outfit selector; GOE chooses the target, or the player is used when no target is found.", "valueOptions": { "allowModifierKeys": true } }
+      ]
+    },
+    {
+      "pageDisplayName": "Quick Outfit",
+      "content": [
+        { "type": "section", "text": "Sorting" },
+        { "type": "text", "text": "Usage counts are stored in each outfit JSON file and are shared across save games." },
+        { "id": "iQuickOutfitSortMode:Profile1", "type": "dropdown", "text": "Quick Outfit Sort Order", "help": "Slot Order uses the original ascending slot order. Usage Frequency places frequently equipped outfits first and resolves ties by slot number.", "valueOptions": { "sourceType": "ModSettingInt", "options": ["Slot Order", "Usage Frequency"] } },
+        { "id": "OM_ResetUsageCounts", "type": "button", "text": "Reset Usage Counts", "help": "Set every saved outfit's cross-save usage count to zero.", "action": { "type": "CallFunction", "form": "OutfitManager.esp|800", "function": "ResetUsageCountsFromMcm" } }
+      ]
+    },
+    {
+      "pageDisplayName": "Outfit Studio",
+      "content": [
+        { "type": "section", "text": "Outfit Studio" },
+        { "type": "text", "text": "The studio edits the character's current worn outfit directly; equip, unequip, material, and exit actions keep the current real state." },
+        { "id": "bEnableOutfitWorkbench:Profile1", "type": "switcher", "text": "Enable Outfit Studio", "help": "Show the Outfit Studio entry on the main management page. Enabled by default.", "valueOptions": { "sourceType": "ModSettingBool" } }
+      ]
+    },
+    {
+      "pageDisplayName": "Weapon Management",
+      "content": [
+        { "type": "section", "text": "Weapon Saving" },
+        { "type": "text", "text": "When enabled, saved outfits include the equipped weapon, standard modifications, and legendary effects." },
+        { "type": "text", "text": "Applying an outfit creates a new independent weapon from the saved record instead of reusing one from inventory." },
+        { "type": "text", "text": "Recognizable unique or special Fallout4.esm modifications are filtered; standard modifications and legendary effects are retained." },
+        { "type": "text", "text": "Effects built into modded weapons, base records, scripts, or special data cannot be identified universally and may remain." },
+        { "type": "text", "text": "When the player or an NPC lacks the required ammo, the system silently supplies three magazines, from 30 to 180 rounds; each ammo type is supplied once per actor per save." },
+        { "type": "text", "text": "Switching outfits removes the last system-generated weapon. When disabled, the studio does not load weapons and only clothing is saved or equipped." },
+        { "id": "bSaveOutfitWeapons:Profile1", "type": "switcher", "text": "Enable Weapon Saving", "help": "Save the equipped weapon, standard modifications, and legendary effects, then create a new independent weapon when applying the outfit. Disabled means the studio does not load weapons.", "valueOptions": { "sourceType": "ModSettingBool" } }
+      ]
+    },
+    {
+      "pageDisplayName": "Preview Lighting",
+      "content": [
+        { "type": "section", "text": "Preview Lighting" },
+        { "type": "text", "text": "The preview uses three temporary world lights indoors and outdoors, with separate LIGH brightness scales. The slider uses fixed 0.25 steps: 0 disables compensation, followed by 25%, 50%, 75%, 100%, 125%, 150%, 175%, and 200%. Indoor 100% matches the previously tested indoor 2.0 effect; changes apply on the next full preview open." },
+        { "id": "fPreviewLightPowerScaleInterior:Profile1", "type": "slider", "text": "Interior Preview Light", "help": "Adjust the indoor preview light from 0.0 to 2.0 in 0.25 steps. Each step selects a fixed LIGH record. Changes apply after closing and reopening the preview UI.", "valueOptions": { "sourceType": "ModSettingFloat", "default": 1.0, "min": 0.0, "max": 2.0, "step": 0.25 } },
+        { "id": "fPreviewLightPowerScaleExterior:Profile1", "type": "slider", "text": "Exterior Preview Light", "help": "Adjust the outdoor preview light from 0.0 to 2.0 in 0.25 steps. Each step selects a fixed LIGH record. Changes apply after closing and reopening the preview UI.", "valueOptions": { "sourceType": "ModSettingFloat", "default": 1.0, "min": 0.0, "max": 2.0, "step": 0.25 } }
+      ]
+    },
+    {
+      "pageDisplayName": "Information",
+      "content": [
+        { "type": "section", "text": "Notifications" },
+        { "id": "bEnableOutfitNotifications:Profile1", "type": "switcher", "text": "Show Outfit Notifications", "help": "Show status notifications for dressing and saving.", "valueOptions": { "sourceType": "ModSettingBool" } },
+        { "type": "section", "text": "Studio Warning" },
+        { "id": "bWarnWorkbenchNudity:Profile1", "type": "switcher", "text": "Warn About Nudity Before Studio", "help": "Show a nudity warning before entering the studio. The studio always starts from the character's actual outfit. Disabled by default.", "valueOptions": { "sourceType": "ModSettingBool" } },
+        { "type": "section", "text": "Confirmation Dialogs" },
+        { "id": "bConfirmResetDefault:Profile1", "type": "switcher", "text": "Confirm Before Restoring Default", "valueOptions": { "sourceType": "ModSettingBool" } },
+        { "id": "bConfirmClearSavedOutfit:Profile1", "type": "switcher", "text": "Confirm Before Clearing an Outfit", "valueOptions": { "sourceType": "ModSettingBool" } },
+        { "id": "bConfirmOverwriteSavedOutfit:Profile1", "type": "switcher", "text": "Confirm Before Overwriting an Outfit", "valueOptions": { "sourceType": "ModSettingBool" } }
+      ]
+    }
+  ]
+}
