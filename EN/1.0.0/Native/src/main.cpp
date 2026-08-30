@@ -1230,13 +1230,13 @@ public:
         }
 
         if (event->QIDCode() == RE::ThumbstickEvent::kRight) {
-            if (now - lastThumbScrollMs_ < 60) {
+            if (now - lastThumbScrollMs_ < 120) {
                 return;
             }
             if (std::abs(y) >= kDeadZone) {
                 InvokeGamepadMenuScript(y > 0.0F ?
-                    "if(window.omScrollItems)window.omScrollItems(-22);" :
-                    "if(window.omScrollItems)window.omScrollItems(22);");
+                    "if(window.omScrollItems)window.omScrollItems(-22,true);" :
+                    "if(window.omScrollItems)window.omScrollItems(22,true);");
                 lastThumbScrollMs_ = now;
             }
             return;

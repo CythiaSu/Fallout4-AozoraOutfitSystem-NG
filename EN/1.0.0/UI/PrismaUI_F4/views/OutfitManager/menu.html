@@ -1882,6 +1882,9 @@
     let marqueeTimer = 0;
     let marqueeFrame = 0;
     let marqueeElement = null;
+    let scrollFocusTimer = 0;
+    let scrollFocusTarget = null;
+    const SCROLL_FOCUS_IDLE_MS = 500;
     function chooseHomeMascotGroup() {
       let next = Math.floor(Math.random() * 3) + 1;
       if (next === lastHomeMascotGroup) next = (next % 3) + 1;
@@ -2137,6 +2140,7 @@
     }
 
     function setPointerInputMode() {
+      cancelScrollFocusSync();
       setInputMode("keyboard", "mouse");
     }
 
@@ -2454,9 +2458,67 @@
     }, true);
 
     function moveFocus(delta) {
+      cancelScrollFocusSync();
       if (state.focusIndex < 0) return setFocus(delta < 0 ? focusables.length - 1 : 0);
       setFocus(state.focusIndex + delta);
     }
+
+    function cancelScrollFocusSync() {
+      clearTimeout(scrollFocusTimer);
+      scrollFocusTimer = 0;
+      scrollFocusTarget = null;
+    }
+
+    function firstVisibleScrollableItem(scroller, selector) {
+      if (!scroller) return null;
+      const view = scroller.getBoundingClientRect();
+      return Array.from(scroller.querySelectorAll(selector)).find(candidate => {
+        const rect = candidate.getBoundingClientRect();
+        return rect.bottom > view.top + 1 && rect.top < view.bottom - 1;
+      }) || null;
+    }
+
+    function focusVisibleSaveTarget() {
+      const row = firstVisibleScrollableItem(scrollFocusTarget, "button.save-target-row");
+      if (!row) return;
+      state.saveTargetIndex = Array.prototype.indexOf.call(saveTargetList.children, row);
+      saveTargetList.querySelectorAll("button.save-target-row").forEach(other => {
+        other.classList.toggle("focused", other === row);
+      });
+      if (state.focusSource !== "mouse") focusDomElement(row);
+      restartFocusedMarquee();
+    }
+
+    function finishScrollFocusSync() {
+      const scroller = scrollFocusTarget;
+      scrollFocusTimer = 0;
+      scrollFocusTarget = null;
+      if (!scroller || !document.contains(scroller)) return;
+      if (state.selectingSaveTarget) {
+        scrollFocusTarget = scroller;
+        focusVisibleSaveTarget();
+        scrollFocusTarget = null;
+        return;
+      }
+      const target = firstVisibleScrollableItem(scroller, ".focusable");
+      const index = focusables.indexOf(target);
+      if (index >= 0) setFocus(index);
+    }
+
+    function scheduleScrollFocusSync(scroller) {
+      if (!scroller) return;
+      scrollFocusTarget = scroller;
+      clearTimeout(scrollFocusTimer);
+      scrollFocusTimer = setTimeout(finishScrollFocusSync, SCROLL_FOCUS_IDLE_MS);
+    }
+
+    function scrollAndScheduleFocus(scroller, amount, syncFocus) {
+      if (!scroller || !amount) return;
+      const before = scroller.scrollTop;
+      scroller.scrollTop += amount;
+      if (syncFocus && scroller.scrollTop !== before) scheduleScrollFocusSync(scroller);
+    }
+
     function activateFocused() {
       // The rename dialog lives outside #content, so its buttons are not part
       // of the normal menu focus list.  Route the gamepad A button directly
@@ -2955,6 +3017,7 @@
     }
 
     function pageBy(delta) {
+      cancelScrollFocusSync();
       if (state.selectingSaveTarget) return pageSaveTargets(delta);
       if (state.mode === "slots") {
         const maxPage = Math.max(0, Math.ceil(state.maxSlot / SLOT_PAGE_SIZE) - 1);
@@ -2972,6 +3035,7 @@
     }
 
     function categoryBy(delta) {
+      cancelScrollFocusSync();
       const index = Math.max(0, categories.findIndex(item => item[0] === state.category));
       state.category = categories[(index + delta + categories.length) % categories.length][0];
       state.studioPage = 0;
@@ -3380,6 +3444,7 @@
     }
 
     function moveSaveTarget(delta) {
+      cancelScrollFocusSync();
       if (state.quickOutfitMode) return moveQuickOutfit(delta);
       const pageStart = state.saveTargetPage * SLOT_PAGE_SIZE;
       const pageLength = Math.max(0, Math.min(SLOT_PAGE_SIZE, state.maxSlot - pageStart));
@@ -3400,6 +3465,7 @@
     }
 
     function pageSaveTargets(delta) {
+      cancelScrollFocusSync();
       if (state.quickOutfitMode) return pageQuickOutfits(delta);
       state.saveTargetPage += delta;
       state.saveTargetIndex = 0;
@@ -3521,6 +3587,7 @@
     }
 
     function finishClosingUi() {
+      cancelScrollFocusSync();
       document.body.classList.remove("quick-outfit-mode");
       clearTimeout(showTopAssistant.timer);
       hideQuickOutfitHint();
@@ -3759,19 +3826,19 @@
       if (document.scrollingElement) document.scrollingElement.scrollTop = 0;
       setPointerInputMode();
       if (state.selectingSaveTarget) {
-        saveTargetList.scrollTop += Number(event.deltaY) || 0;
+        scrollAndScheduleFocus(saveTargetList, Number(event.deltaY) || 0, true);
         event.preventDefault();
         event.stopPropagation();
         return;
       }
       const eventScroller = event.target && event.target.closest ? event.target.closest(".scroll") : null;
       if (eventScroller) {
-        eventScroller.scrollTop += Number(event.deltaY) || 0;
+        scrollAndScheduleFocus(eventScroller, Number(event.deltaY) || 0, true);
         event.preventDefault();
         event.stopPropagation();
         return;
       }
-      window.omScrollItems(event.deltaY);
+      window.omScrollItems(event.deltaY, true);
       event.preventDefault();
       event.stopPropagation();
     }, { passive: false });
@@ -4581,10 +4648,15 @@
       // compositor to receive a cleared frame before the native view is hidden.
       forcePaintPulse(8);
     };
-    window.omScrollItems = delta => {
+    window.omScrollItems = (delta, syncFocus = false) => {
       if (state.booting || state.renamingSlot || state.confirming) return;
+      const amount = Number(delta) || 0;
       if (state.selectingSaveTarget && state.quickOutfitMode) {
-        saveTargetList.scrollTop += Number(delta) || 0;
+        scrollAndScheduleFocus(saveTargetList, amount, syncFocus);
+        return;
+      }
+      if (state.selectingSaveTarget) {
+        scrollAndScheduleFocus(saveTargetList, amount, syncFocus);
         return;
       }
       const scrollers = Array.from(content.querySelectorAll(".scroll"));
@@ -4592,7 +4664,7 @@
       const active = state.mode === "slots"
         ? content.querySelector(".outfit-items.scroll")
         : ((focused && focused.closest(".scroll")) || scrollers[scrollers.length - 1]);
-      if (active) active.scrollTop += Number(delta) || 0;
+      scrollAndScheduleFocus(active, amount, syncFocus);
       if (document.scrollingElement) document.scrollingElement.scrollTop = 0;
     };
 

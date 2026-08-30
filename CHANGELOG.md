@@ -7,6 +7,8 @@
   without a focus so the reordered list cannot select the wrong outfit.
 - Store the remembered quick-outfit page in the native session state so it
   survives PrismaUI view destruction and recreation.
+- Delay focus placement after mouse-wheel and right-stick scrolling until the
+  scroll settles, then focus the first visible selectable item once.
 
 ## 1.0.0 - NG release line
 
