@@ -13,6 +13,8 @@
   increase right-stick scrolling from 22px to 48px per input step.
 - Use a 400ms scroll-idle delay so focus recovery feels more responsive while
   avoiding repeated focus traversal during active scrolling.
+- Keep delayed focus recovery alive across large mouse-wheel bursts and
+  refresh the live list after the scroll has settled.
 
 ## 1.0.0 - NG release line
 

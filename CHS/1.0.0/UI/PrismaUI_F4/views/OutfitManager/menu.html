@@ -1813,6 +1813,8 @@
     let scrollFocusTimer = 0;
     let scrollFocusTarget = null;
     let scrollFocusRetryCount = 0;
+    let scrollFocusGeneration = 0;
+    let scrollFocusDeadline = 0;
     const SCROLL_FOCUS_IDLE_MS = 400;
     function chooseHomeMascotGroup() {
       let next = Math.floor(Math.random() * 3) + 1;
@@ -2393,10 +2395,12 @@
     }
 
     function cancelScrollFocusSync() {
+      scrollFocusGeneration += 1;
       clearTimeout(scrollFocusTimer);
       scrollFocusTimer = 0;
       scrollFocusTarget = null;
       scrollFocusRetryCount = 0;
+      scrollFocusDeadline = 0;
     }
 
     function firstVisibleScrollableItem(scroller, selector) {
@@ -2421,13 +2425,14 @@
 
     function focusVisibleSaveTarget() {
       const row = firstVisibleScrollableItem(scrollFocusTarget, "button.save-target-row");
-      if (!row) return;
+      if (!row) return false;
       state.saveTargetIndex = Array.prototype.indexOf.call(saveTargetList.children, row);
       saveTargetList.querySelectorAll("button.save-target-row").forEach(other => {
         other.classList.toggle("focused", other === row);
       });
       if (state.focusSource !== "mouse") focusDomElement(row);
       restartFocusedMarquee();
+      return true;
     }
 
     function resolveCurrentScrollFocusTarget() {
@@ -2440,18 +2445,39 @@
         : ((focused && focused.closest(".scroll")) || scrollers[scrollers.length - 1] || null);
     }
 
-    function finishScrollFocusSync() {
+    function finishScrollFocusSync(generation = scrollFocusGeneration) {
+      if (generation !== scrollFocusGeneration) return;
+      const remaining = scrollFocusDeadline - performance.now();
+      if (remaining > 0) {
+        scrollFocusTimer = setTimeout(() => finishScrollFocusSync(generation), Math.max(16, remaining));
+        return;
+      }
       let scroller = scrollFocusTarget;
       scrollFocusTimer = 0;
       scrollFocusTarget = null;
       if (!scroller || !document.contains(scroller)) {
         scroller = resolveCurrentScrollFocusTarget();
       }
-      if (!scroller || !document.contains(scroller)) return;
+      if (!scroller || !document.contains(scroller)) {
+        if (scrollFocusRetryCount < 3) {
+          scrollFocusRetryCount += 1;
+          scrollFocusTimer = setTimeout(() => finishScrollFocusSync(generation), 80);
+        } else {
+          scrollFocusRetryCount = 0;
+        }
+        return;
+      }
       if (state.selectingSaveTarget) {
         scrollFocusTarget = scroller;
-        focusVisibleSaveTarget();
+        const focused = focusVisibleSaveTarget();
         scrollFocusTarget = null;
+        if (!focused && scrollFocusRetryCount < 3) {
+          scrollFocusRetryCount += 1;
+          scrollFocusTarget = scroller;
+          scrollFocusTimer = setTimeout(() => finishScrollFocusSync(generation), 80);
+        } else if (focused) {
+          scrollFocusRetryCount = 0;
+        }
         return;
       }
       // A delayed callback can run after a page refresh replaced the list.
@@ -2467,7 +2493,7 @@
       if (scrollFocusRetryCount < 3) {
         scrollFocusRetryCount += 1;
         scrollFocusTarget = scroller;
-        scrollFocusTimer = setTimeout(finishScrollFocusSync, 80);
+        scrollFocusTimer = setTimeout(() => finishScrollFocusSync(generation), 80);
       } else {
         scrollFocusRetryCount = 0;
       }
@@ -2475,10 +2501,13 @@
 
     function scheduleScrollFocusSync(scroller) {
       if (!scroller) return;
+      scrollFocusGeneration += 1;
+      const generation = scrollFocusGeneration;
       scrollFocusTarget = scroller;
       scrollFocusRetryCount = 0;
+      scrollFocusDeadline = performance.now() + SCROLL_FOCUS_IDLE_MS;
       clearTimeout(scrollFocusTimer);
-      scrollFocusTimer = setTimeout(finishScrollFocusSync, SCROLL_FOCUS_IDLE_MS);
+      scrollFocusTimer = setTimeout(() => finishScrollFocusSync(generation), SCROLL_FOCUS_IDLE_MS);
     }
 
     function scrollAndScheduleFocus(scroller, amount, syncFocus) {
@@ -3795,7 +3824,10 @@
 
     document.addEventListener("wheel", event => {
       if (document.scrollingElement) document.scrollingElement.scrollTop = 0;
-      setPointerInputMode();
+      // Wheel input must not cancel the delayed focus job that belongs to the
+      // same wheel burst. Actual pointer movement still cancels it through the
+      // content interaction handlers above.
+      setInputMode("keyboard", "mouse");
       if (state.selectingSaveTarget) {
         scrollAndScheduleFocus(saveTargetList, Number(event.deltaY) || 0, true);
         event.preventDefault();
