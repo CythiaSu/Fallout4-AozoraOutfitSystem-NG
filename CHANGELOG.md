@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.0.2
+
+- Reapply an NPC's active saved outfit after its cell is reattached or fully
+  loaded, preventing fast travel from restoring the vanilla outfit.
+- Recheck managed NPC outfits after AI/default-outfit equipment events so daily
+  schedule changes and long-distance unloading cannot silently replace them.
+- Route real NPC outfit items through the teammate container-transfer path and
+  preserve the NPC equip-state lock, matching the vanilla trade-menu equip path.
+- Delay and retry the reapply on the game thread so NPC inventory and 3D state
+  have time to settle after a cell transition.
+
 ## 1.0.1
 
 - Remember the last Quick Outfit Switcher page between openings.

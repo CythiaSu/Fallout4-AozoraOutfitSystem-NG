@@ -1,0 +1,20 @@
+{
+  "_文件说明": "预览镜头调校。每次关闭并重新打开服装管理器后读取。补光使用室内三盏、室外三盏的固定世界灯布局，并为两个场景分别使用自定义 LIGH 亮度标尺；室内逻辑 100% 对应之前实测的室内 2.0 效果。",
+
+  "targetScanRadius": 512,
+  "targetScanRadius__说明": "选择目标页面扫描 NPC 的范围，单位为游戏世界单位。GOE 射线直选不受此值限制。",
+  "visualScalePercent": 110,
+  "visualScalePercent__说明": "角色在预览中的视觉大小。只改变预览镜头，不会修改角色真实缩放、装备或存档。建议范围 70 到 140。",
+  "cameraDistance": 277,
+  "cameraDistance__说明": "镜头与角色的基础前后距离。数值越小角色越大。建议范围 160 到 360。",
+  "cameraRight": -30,
+  "cameraRight__说明": "镜头相对角色的左右位置。建议每次调整 10 到 20。",
+  "cameraHeight": 98,
+  "cameraHeight__说明": "镜头相对角色的上下位置。建议每次调整 10 到 20。",
+  "cameraFov": 70,
+  "cameraFov__说明": "预览镜头视角。建议范围 55 到 80。",
+  "cameraYawOffsetDegrees": -20,
+  "cameraYawOffsetDegrees__说明": "镜头左右朝向偏移，单位为度。建议范围 -25 到 25。",
+  "cameraPitchDegrees": 6,
+  "cameraPitchDegrees__说明": "镜头上下朝向偏移，建议一次只调 2 到 4。"
+}

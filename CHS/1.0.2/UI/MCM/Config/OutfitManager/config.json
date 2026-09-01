@@ -1,0 +1,78 @@
+{
+  "modName": "OutfitManager",
+  "displayName": "青空服装管理系统 NG",
+  "minMcmVersion": 1,
+  "pluginRequirements": ["OutfitManager.esp"],
+  "content": [
+    { "type": "section", "text": "系统状态" },
+    { "type": "text", "text": "青空服装管理系统 NG · 套装保存、即时换装、材质定制与角色管理" },
+    { "type": "section", "text": "系统说明" },
+    { "type": "text", "text": "NG 版本基于 2.0.4 之后的系统重新建立版本线，采用即时提交模式：选择套装或在工作台穿脱物品都会直接改变角色当前穿着。" },
+    { "type": "text", "text": "重点支持玩家与 NPC 的套装保存、快速换装和实时编辑；退出菜单或工作台时会保留角色当前穿着。" },
+    { "type": "text", "text": "为兼容旧版设置与套装数据，插件文件、MCM 标识和数据目录继续沿用 OutfitManager 名称。" }
+  ],
+  "pages": [
+    {
+      "pageDisplayName": "热键",
+      "content": [
+        { "type": "section", "text": "快捷操作" },
+        { "id": "OM_MenuHotkey", "type": "hotkey", "text": "打开/关闭管理系统", "help": "打开或关闭青空服装管理系统 NG。", "valueOptions": { "allowModifierKeys": true } },
+        { "id": "OM_StudioHotkey", "type": "hotkey", "text": "打开服装工作台", "help": "为当前目标直接打开服装工作台。", "valueOptions": { "allowModifierKeys": true } },
+        { "id": "OM_RandomHotkey", "type": "hotkey", "text": "随机换装", "help": "对当前目标随机更换一套符合其性别的已保存套装。", "valueOptions": { "allowModifierKeys": true } },
+        { "id": "OM_QuickOutfitHotkey", "type": "hotkey", "text": "快捷换装", "help": "打开简洁的套装选择器；目标由 GOE 准星判定，没有目标时使用玩家。", "valueOptions": { "allowModifierKeys": true } }
+      ]
+    },
+    {
+      "pageDisplayName": "快速换装",
+      "content": [
+        { "type": "section", "text": "排序方式" },
+        { "type": "text", "text": "使用次数保存在每个套装 JSON 文件中，可跨存档共享。" },
+        { "id": "iQuickOutfitSortMode:Profile1", "type": "dropdown", "text": "快速换装排序", "help": "槽位顺序使用原有的序号升序；使用频率会把常用套装放在前面，次数相同时仍按槽位序号排序。", "valueOptions": { "sourceType": "ModSettingInt", "options": ["槽位顺序", "使用频率"] } },
+        { "id": "OM_ResetUsageCounts", "type": "button", "text": "重置使用次数", "help": "把全部已保存套装的跨存档使用次数重置为零。", "action": { "type": "CallFunction", "form": "OutfitManager.esp|800", "function": "ResetUsageCountsFromMcm" } }
+      ]
+    },
+    {
+      "pageDisplayName": "服装工作台",
+      "content": [
+        { "type": "section", "text": "服装工作台" },
+        { "type": "text", "text": "工作台直接从角色当前穿着开始编辑；穿上、脱下、材质操作和退出都会保留当前真实状态。" },
+        { "id": "bEnableOutfitWorkbench:Profile1", "type": "switcher", "text": "启用服装工作台", "help": "开启后在管理系统主页面显示服装工作台入口。默认开启。", "valueOptions": { "sourceType": "ModSettingBool" } }
+      ]
+    },
+    {
+      "pageDisplayName": "武器管理",
+      "content": [
+        { "type": "section", "text": "武器保存" },
+        { "type": "text", "text": "开启后，保存套装时会记录角色当前装备的武器、普通改造与传奇效果。" },
+        { "type": "text", "text": "应用套装时不会复用背包中的武器，而是按照保存记录生成一把新的独立武器。" },
+        { "type": "text", "text": "仅过滤可识别的 Fallout4.esm 原版唯一或特殊改装，普通改造与传奇效果会保留。" },
+        { "type": "text", "text": "MOD 武器以及基础记录、脚本或特殊数据自带的效果无法通用识别，仍可能保留。" },
+        { "type": "text", "text": "玩家或 NPC 没有对应弹药时，系统会静默补充 3 个弹匣，最少 30 发、最多 180 发；每种弹药对玩家及每名 NPC 在同一存档中只补充一次。" },
+        { "type": "text", "text": "切换其他套装时会清理上一次由系统生成的武器；关闭后工作台不会加载武器，保存与换装只处理服装。" },
+        { "id": "bSaveOutfitWeapons:Profile1", "type": "switcher", "text": "启用武器保存", "help": "开启后记录当前装备的武器、普通改造与传奇效果，并在应用套装时生成新的独立武器；关闭后工作台不加载武器。", "valueOptions": { "sourceType": "ModSettingBool" } }
+      ]
+    },
+    {
+      "pageDisplayName": "补光调整",
+      "content": [
+        { "type": "section", "text": "补光调整" },
+        { "type": "text", "text": "预览使用室内三盏、室外三盏临时世界灯，并为两个场景分别使用独立的 LIGH 亮度标尺。滑条按 0.25 递进：0 为关闭，之后依次为 25%、50%、75%、100%、125%、150%、175% 和 200%。室内 100% 对应之前实测的室内 2.0 效果，关闭并重新打开预览 UI 后生效。" },
+        { "id": "fPreviewLightPowerScaleInterior:Profile1", "type": "slider", "text": "室内预览补光", "help": "调节室内预览补光，范围 0.0 到 2.0，步进 0.25。每一档对应一个固定的 LIGH 记录，关闭并重新打开预览 UI 后生效。", "valueOptions": { "sourceType": "ModSettingFloat", "default": 1.0, "min": 0.0, "max": 2.0, "step": 0.25 } },
+        { "id": "fPreviewLightPowerScaleExterior:Profile1", "type": "slider", "text": "室外预览补光", "help": "调节室外预览补光，范围 0.0 到 2.0，步进 0.25。每一档对应一个固定的 LIGH 记录，关闭并重新打开预览 UI 后生效。", "valueOptions": { "sourceType": "ModSettingFloat", "default": 1.0, "min": 0.0, "max": 2.0, "step": 0.25 } }
+      ]
+    },
+    {
+      "pageDisplayName": "提示信息",
+      "content": [
+        { "type": "section", "text": "提示信息" },
+        { "id": "bEnableOutfitNotifications:Profile1", "type": "switcher", "text": "显示换装通知", "help": "显示换装完成、保存成功等状态通知。", "valueOptions": { "sourceType": "ModSettingBool" } },
+        { "type": "section", "text": "工作台提示" },
+        { "id": "bWarnWorkbenchNudity:Profile1", "type": "switcher", "text": "进入工作台前提示裸露", "help": "进入工作台前显示裸露内容提示。无论是否显示此提示，工作台都会从角色的当前真实穿着开始编辑。默认关闭。", "valueOptions": { "sourceType": "ModSettingBool" } },
+        { "type": "section", "text": "确认弹窗" },
+        { "id": "bConfirmResetDefault:Profile1", "type": "switcher", "text": "恢复默认前确认", "valueOptions": { "sourceType": "ModSettingBool" } },
+        { "id": "bConfirmClearSavedOutfit:Profile1", "type": "switcher", "text": "清空套装前确认", "valueOptions": { "sourceType": "ModSettingBool" } },
+        { "id": "bConfirmOverwriteSavedOutfit:Profile1", "type": "switcher", "text": "覆盖套装前确认", "valueOptions": { "sourceType": "ModSettingBool" } }
+      ]
+    }
+  ]
+}

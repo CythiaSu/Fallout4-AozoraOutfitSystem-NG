@@ -1,0 +1,25 @@
+{
+  "modName": "OutfitManager",
+  "keybinds": [
+    {
+      "id": "OM_MenuHotkey",
+      "desc": "Open/Close Aozora Outfit Management System NG",
+      "action": { "type": "CallGlobalFunction", "script": "OutfitManager", "function": "OnMcmMenuHotkey" }
+    },
+    {
+      "id": "OM_StudioHotkey",
+      "desc": "Open Outfit Studio",
+      "action": { "type": "CallGlobalFunction", "script": "OutfitManager", "function": "OnMcmStudioHotkey" }
+    },
+    {
+      "id": "OM_RandomHotkey",
+      "desc": "Random Outfit",
+      "action": { "type": "CallGlobalFunction", "script": "OutfitManager", "function": "OnMcmRandomHotkey" }
+    },
+    {
+      "id": "OM_QuickOutfitHotkey",
+      "desc": "Quick Outfit Switcher",
+      "action": { "type": "CallGlobalFunction", "script": "OutfitManager", "function": "OnMcmQuickOutfitHotkey" }
+    }
+  ]
+}
