@@ -1,6 +1,6 @@
 # Build Guide
 
-This document describes the NG `1.0.2` build using the `1.0.2`
+This document describes the NG `1.1.0` build using the `1.1.0`
 language source layout. The repository does not
 vendor the large CommonLibF4 dependency or generated Fallout 4 binaries.
 
@@ -8,9 +8,10 @@ vendor the large CommonLibF4 dependency or generated Fallout 4 binaries.
 
 1. Install the Fallout 4/CommonLibF4 development dependencies and the x64
    Visual Studio toolchain.
-2. Place the CommonLibF4 source tree beside the selected `Native` directory at
-   `../commonlibf4-frakkin64`.
-3. Open either `CHS/1.0.2/Native` or `EN/1.0.2/Native`.
+2. Use the checked-in upstream development baseline at
+   `../_upstream/commonlibf4-dear-latest`, or replace the two `1.1.0` xmake
+   paths with an equivalent CommonLibF4 tree that declares AE `1.11.240`.
+3. Open either `CHS/1.1.0/Native` or `EN/1.1.0/Native`.
 4. Build with the repository's `xmake.lua`:
 
    ```powershell
@@ -36,6 +37,9 @@ already contains the required mascot assets under
 under `UI/F4SE/Plugins/OutfitManager` provide the 16:9 and 16:10 layout
 profiles and UI tuning values.
 
-The release package must also contain the separately built `OutfitManager.dll`,
+The native target includes Old-Gen `1.10.163` and AE `1.11.137` through
+`1.11.240`. The 1.1.0 release package targets PrismaUI 2.1.0 or newer. The previous 1.0.2
+package remains the rollback baseline for PrismaUI 2.0.6. The release package
+must also contain the separately built `OutfitManager.dll`,
 compiled Papyrus `.pex` files, and the release `OutfitManager.esp`. Keep EN and
 CHS packages separate and install only one language package.

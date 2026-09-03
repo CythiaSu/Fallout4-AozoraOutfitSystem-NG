@@ -1,5 +1,25 @@
 # Changelog
 
+## 1.1.0
+
+- Matched the PrismaUI 2.1 Ultralight runtime contract while retaining the
+  V1-V10-compatible public API path.
+- Replaced large C++ to JavaScript state, studio-inventory, material, and result
+  pushes with JSON `InteropCall` delivery.
+- Added per-view JavaScript console logging and unhealthy-view recovery using
+  PrismaUI's view-health API.
+- Added first-focus warmup and a lightweight open-view liveness pulse for the
+  Ultralight CPU compositor.
+- Removed the obsolete one-shot paint-pulse workaround, unreachable 1px media
+  queries, unused native helpers, and stale migration comments.
+- Added Steam Deck-safe font fallbacks and tabular numeric rendering, centered
+  generated icons, and a compact quick-outfit baseline that follows layout scaling.
+- Added initial-delay/repeat handling for held keyboard navigation and left-stick
+  navigation, with release/close cleanup.
+- Kept the view reusable across normal closes instead of destroying and
+  recreating it through the former CEF clear-frame path.
+- Preserved the 1.0.2 source and release packages as the rollback baseline.
+
 ## 1.0.2
 
 - Reapply an NPC's active saved outfit after its cell is reattached or fully
