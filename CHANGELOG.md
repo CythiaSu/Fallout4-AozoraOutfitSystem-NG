@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.1.1
+
+- Compared with 1.1.0, fixed several bugs encountered during runtime on the AE
+  version.
+
 ## 1.1.0
 
 - Matched the PrismaUI 2.1 Ultralight runtime contract while retaining the

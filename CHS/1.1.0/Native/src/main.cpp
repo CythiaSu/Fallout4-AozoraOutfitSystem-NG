@@ -36,7 +36,7 @@ namespace fs = std::filesystem;
 
 OUTFITMANAGER_EXPORT F4SE::PluginVersionData F4SEPlugin_Version = []() noexcept {
     F4SE::PluginVersionData v{};
-    v.PluginVersion({ 1, 1, 0, 0 });
+    v.PluginVersion({ 1, 1, 1, 0 });
     v.PluginName("OutfitManager");
     v.AuthorName("OutfitManager Author");
     v.UsesAddressLibrary(true);
@@ -267,6 +267,57 @@ static bool g_mainFreezeCaptured = false;
 static bool g_hudVisibilityCaptured = false;
 static bool g_hudWasVisible = true;
 static std::string g_uiLayoutProfile = "standard";
+using ClipCursorFunction = BOOL(WINAPI*)(const RECT*);
+static std::atomic<ClipCursorFunction> g_originalClipCursor{ nullptr };
+
+static BOOL WINAPI AEClipCursorHook(const RECT* requestedRect) noexcept {
+    const auto original = g_originalClipCursor.load(std::memory_order_acquire);
+    if (g_menuOpen && !g_hiddenBehindGameMenu && REX::FModule::IsRuntimeAE()) {
+        const auto foreground = GetForegroundWindow();
+        DWORD processID = 0;
+        if (foreground &&
+            GetWindowThreadProcessId(foreground, &processID) != 0 &&
+            processID == GetCurrentProcessId()) {
+            RECT client{};
+            if (GetClientRect(foreground, &client)) {
+                POINT corners[2]{
+                    { client.left, client.top },
+                    { client.right, client.bottom }
+                };
+                MapWindowPoints(foreground, nullptr, corners, 2);
+                RECT fullClient{
+                    corners[0].x, corners[0].y,
+                    corners[1].x, corners[1].y
+                };
+                // Bypass the previous IAT layer only while our menu is open.
+                // The game otherwise keeps its original ClipCursor behavior.
+                return ::ClipCursor(&fullClient);
+            }
+        }
+    }
+    return original ? original(requestedRect) : ::ClipCursor(requestedRect);
+}
+
+static void InstallAEClipCursorGuard() noexcept {
+    if (!REX::FModule::IsRuntimeAE()) return;
+    auto game = REX::FModule::GetExecutingModule();
+    auto* importSlot = game.GetImportFunctionPointer("ClipCursor", "USER32.dll");
+    if (!importSlot) {
+        LogLine("1.1 AE ClipCursor guard unavailable: game IAT entry not found");
+        return;
+    }
+    const auto previous = *reinterpret_cast<ClipCursorFunction*>(importSlot);
+    if (previous == &AEClipCursorHook) return;
+    if (!game.SetImportFunctionPointer(
+            "ClipCursor", "USER32.dll", reinterpret_cast<void*>(&AEClipCursorHook))) {
+        LogLine("1.1 AE ClipCursor guard install failed");
+        return;
+    }
+    g_originalClipCursor.store(
+        reinterpret_cast<ClipCursorFunction>(previous), std::memory_order_release);
+    LogLine("1.1 AE ClipCursor guard installed");
+}
+
 struct QuickTargetShaderState {
     RE::TESEffectShader* shader = nullptr;
     RE::EffectShaderData original{};
@@ -1007,6 +1058,7 @@ static bool PresentMenuView(const char* reason, bool ensureVisible = true) {
     }
 
     if (ensureVisible) g_prisma->Show(g_view);
+    InstallAEClipCursorGuard();
     InteropMenuCall("omWake", "{}");
     // This is a standalone menu opened from gameplay. Keep Prisma's FocusMenu
     // active so it owns the game cursor and routes mouse input to this view.
@@ -1249,6 +1301,11 @@ static void UpdateGameMenuCoverState() {
 }
 
 static bool PerformNpcStopAction(RE::Actor* actor, RE::DEFAULT_OBJECT actionID) {
+    // BGSDefaultObjectManager::GetSingleton() is inlined on NG/AE and its
+    // legacy relocation is intentionally 0 in the multiruntime CommonLib.
+    // The motion-stop helper is cosmetic, so skip it on those runtimes rather
+    // than resolving an invalid Address Library ID during outfit operations.
+    if (!REX::FModule::IsRuntimeOG()) return false;
     auto* defaults = RE::BGSDefaultObjectManager::GetSingleton();
     auto* action = defaults ? defaults->GetDefaultObject<RE::BGSAction>(actionID) : nullptr;
     return actor && action && actor->PerformAction(action, nullptr);
@@ -1528,10 +1585,9 @@ public:
                 return;
             }
             // When Prisma owns the view, the framework already receives the physical
-            // key event. Forwarding another synthetic key here makes one
-            // press move two focus steps. Keep consuming the game event so
-            // Fallout and other menus cannot see it, but leave the browser
-            // path as the single UI input source.
+            // key event. Forwarding another synthetic key here makes one press move two
+            // focus steps. Keep consuming the game event so Fallout and other menus
+            // cannot see it, but leave the browser path as the single UI input source.
             if (MenuViewHasFocus()) return;
             const bool isRotateKey =
                 code == static_cast<std::int32_t>(RE::BS_BUTTON_CODE::kJ) ||
@@ -3880,6 +3936,7 @@ static void F4SEMessageHandler(F4SE::MessagingInterface::Message* message) {
     switch (message->type) {
     case F4SE::MessagingInterface::kGameDataReady:
         g_prisma = PRISMA_UI_API::RequestPluginAPI<PRISMA_UI_API::IVPrismaUI10>();
+        InstallAEClipCursorGuard();
         RegisterActorCellEventHandler();
         LogLine(std::string("2.0 Prisma V10 ") + (g_prisma ? "ready" : "unavailable"));
         break;
@@ -4874,7 +4931,7 @@ static std::string Summ(int s) {
 }
 
 // ======== Native Functions ========
-RE::BSFixedString OM_GetPluginVersion(std::monostate) { return "1.1.0"; }
+RE::BSFixedString OM_GetPluginVersion(std::monostate) { return "1.1.1"; }
 RE::BSFixedString OM_GetSlotPath(std::monostate, int s) { return SlotPath(s).string().c_str(); }
 bool OM_IsMenuAvailable(std::monostate) { return GetModuleHandleW(L"PrismaUI_F4.dll") != nullptr; }
 bool OM_PreparePlayerPreview(std::monostate) {
@@ -6579,9 +6636,18 @@ static void RefreshActorAppearance(RE::Actor* actor, bool settled) {
         return previewRef && previewRef.get() == actor;
     }();
     // EquipManager already rebuilds the player's biped and emits the equip
-    // events used by high-heel systems. Rebuilding the settled player again
-    // here can erase the heel node offset immediately after a successful apply.
-    if (actor == RE::PlayerCharacter::GetSingleton() && !previewActor) return;
+    // events used by high-heel systems. NG and AE need the same body-only
+    // Reset3D path used by the workbench so a settled outfit becomes visible
+    // while the menu is open. Keep OG on its original path.
+    if (actor == RE::PlayerCharacter::GetSingleton() && !previewActor) {
+        if (settled && (REX::FModule::IsRuntimeNG() || REX::FModule::IsRuntimeAE())) {
+            constexpr std::uint32_t kBodyOnlyExcludeFlags =
+                static_cast<std::uint32_t>(RE::RESET_3D_FLAGS::kHead) |
+                static_cast<std::uint32_t>(RE::RESET_3D_FLAGS::kFace);
+            actor->Reset3D(true, 0, true, kBodyOnlyExcludeFlags);
+        }
+        return;
+    }
     // Match F4SE Actor.QueueUpdate(true, 0xC). F4SE documents 0xC as the
     // body-only update mask: equipment/BipedAnim is rebuilt while head and face
     // are excluded. This is the narrowest reliable rebuild for outfit changes
@@ -7240,8 +7306,12 @@ static bool MatchesExplicitArmorFilter(
 static bool HasMaterialSwapProperty(const RE::BGSMod::Attachment::Mod* mod) {
     if (!mod) return false;
     if (mod->swapForm) return true;
-    RE::BGSMod::Attachment::Mod::Data data{};
-    mod->GetData(data);
+    // Mod::GetData() is inlined on NG/AE and has no callable relocation there.
+    // The shared Container accessor remains valid across the supported
+    // runtimes and exposes the property block we need for material detection.
+    RE::BGSMod::Container::Data data{};
+    const auto* container = static_cast<const RE::BGSMod::Container*>(mod);
+    if (!container->GetData(&data)) return false;
     if (!data.propertyMods) return false;
     for (std::uint32_t i = 0; i < data.propertyModCount; ++i) {
         const auto& property = data.propertyMods[i];
@@ -8002,7 +8072,14 @@ static int EquipOutfitForActor(
         SetActiveSlotForActor(actor, slot);
         IncrementSlotUsageCount(slot);
     }
-    if (actor != RE::PlayerCharacter::GetSingleton()) RefreshActorAppearance(actor, true);
+    if (actor != RE::PlayerCharacter::GetSingleton()) {
+        RefreshActorAppearance(actor, true);
+    } else if (equippedCount > 0 && g_menuOpen && !IsLightweightMenuMode() &&
+        (REX::FModule::IsRuntimeNG() || REX::FModule::IsRuntimeAE())) {
+        LogLine("1.1 full-menu player outfit refresh requested slot=" + std::to_string(slot));
+        RefreshActorAppearance(actor, true);
+        LogLine("1.1 full-menu player outfit refresh submitted slot=" + std::to_string(slot));
+    }
     LogLine("2.0 native equip target=" + FormIDHex(actor->formID) + " slot=" + std::to_string(slot) + " equipped=" + std::to_string(equippedCount) + "/" + std::to_string(items.size()));
     return equippedCount;
 }

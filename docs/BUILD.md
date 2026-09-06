@@ -1,6 +1,6 @@
 # Build Guide
 
-This document describes the NG `1.1.0` build using the `1.1.0`
+This document describes the NG `1.1.1` build using the existing `1.1.0`
 language source layout. The repository does not
 vendor the large CommonLibF4 dependency or generated Fallout 4 binaries.
 
@@ -37,8 +37,9 @@ already contains the required mascot assets under
 under `UI/F4SE/Plugins/OutfitManager` provide the 16:9 and 16:10 layout
 profiles and UI tuning values.
 
-The native target includes Old-Gen `1.10.163` and AE `1.11.137` through
-`1.11.240`. The 1.1.0 release package targets PrismaUI 2.1.0 or newer. The previous 1.0.2
+The native target theoretically supports all OG and AE versions. Runtime
+verification has currently been performed only on OG and AE `1.11.240`. The
+1.1.1 release package targets PrismaUI 2.1.0 or newer. The previous 1.0.2
 package remains the rollback baseline for PrismaUI 2.0.6. The release package
 must also contain the separately built `OutfitManager.dll`,
 compiled Papyrus `.pex` files, and the release `OutfitManager.esp`. Keep EN and

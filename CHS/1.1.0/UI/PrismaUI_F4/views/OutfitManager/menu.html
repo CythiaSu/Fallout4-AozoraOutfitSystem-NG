@@ -2292,8 +2292,17 @@
 
     function setInputMode(mode, source = "") {
       const next = mode === "gamepad" ? "gamepad" : "keyboard";
+      const transferFromPointer = state.focusSource === "mouse" && source !== "mouse";
       state.focusSource = source || next;
       document.body.dataset.focusSource = state.focusSource;
+      if (transferFromPointer) {
+        const current = state.selectingSaveTarget
+          ? saveTargetList && saveTargetList.children[state.saveTargetIndex]
+          : focusables[state.focusIndex];
+        const active = document.activeElement;
+        if (active && active !== current && typeof active.blur === "function") active.blur();
+        if (current) focusDomElement(current);
+      }
       if (state.inputMode === next) return;
       state.inputMode = next;
       setFooter(state.mode);
@@ -2313,6 +2322,18 @@
     function setPointerInputMode() {
       cancelScrollFocusSync();
       setInputMode("keyboard", "mouse");
+    }
+
+    let lastPointerX = null;
+    let lastPointerY = null;
+    function pointerActuallyMoved(event) {
+      const x = Number(event && event.clientX);
+      const y = Number(event && event.clientY);
+      if (!Number.isFinite(x) || !Number.isFinite(y)) return false;
+      const moved = lastPointerX === null || x !== lastPointerX || y !== lastPointerY;
+      lastPointerX = x;
+      lastPointerY = y;
+      return moved;
     }
 
     function updateContentPointerFocus(control) {
@@ -2562,12 +2583,14 @@
         // re-rendered after keyboard/gamepad navigation. Only the last real
         // pointer owner may take focus back; mousemove below restores it.
         if (state.focusSource !== "mouse" && state.focusSource !== "none") return;
+        if (!pointerActuallyMoved(event)) return;
         updateContentPointerFocus(control);
       }, true);
       content.addEventListener("mousemove", event => {
         const target = event.target && event.target.closest ? event.target : null;
         const control = target ? target.closest(".focusable, .category-button") : null;
         if (!control || !content.contains(control)) return;
+        if (!pointerActuallyMoved(event)) return;
         updateContentPointerFocus(control);
       }, true);
       content.addEventListener("mousedown", event => {
@@ -2575,9 +2598,6 @@
         const control = target ? target.closest(".focusable, .category-button") : null;
         if (!control || !content.contains(control)) return;
         setPointerInputMode();
-        // Prevent the browser button from stealing DOM focus from the menu's
-        // keyboard/gamepad focus model while keeping the click event usable.
-        event.preventDefault();
       }, true);
       content.addEventListener("click", event => {
         const target = event.target && event.target.closest ? event.target : null;
@@ -2603,6 +2623,7 @@
       if (!row || !saveTargetList.contains(row)) return;
       if (event.relatedTarget && row.contains(event.relatedTarget)) return;
       if (state.focusSource !== "mouse" && state.focusSource !== "none") return;
+      if (!pointerActuallyMoved(event)) return;
       setPointerInputMode();
       const nextIndex = Array.prototype.indexOf.call(saveTargetList.children, row);
       if (state.saveTargetIndex === nextIndex) return;
@@ -2616,6 +2637,7 @@
       const target = event.target && event.target.closest ? event.target : null;
       const row = target ? target.closest("button.save-target-row") : null;
       if (!row || !saveTargetList.contains(row)) return;
+      if (!pointerActuallyMoved(event)) return;
       setPointerInputMode();
       const nextIndex = Array.prototype.indexOf.call(saveTargetList.children, row);
       if (state.saveTargetIndex === nextIndex) return;
@@ -2630,7 +2652,6 @@
       const row = target ? target.closest("button.save-target-row") : null;
       if (!row || !saveTargetList.contains(row)) return;
       setPointerInputMode();
-      event.preventDefault();
     }, true);
     saveTargetList.addEventListener("click", event => {
       const target = event.target && event.target.closest ? event.target : null;

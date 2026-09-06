@@ -3,7 +3,7 @@ set_xmakever("3.0.0")
 
 -- set project constants
 set_project("OutfitManager")
-set_version("1.1.0")
+set_version("1.1.1")
 set_arch("x64")
 set_languages("c++23")
 set_warnings("allextra")
