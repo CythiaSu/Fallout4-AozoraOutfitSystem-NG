@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.1.2
+
+- Fixed Steam Deck gamepad focus on the rename-slot dialog.
+- Removed duplicate LT/RT paging from the outfit-management page.
+- Added an optional, default-on confirmation dialog explaining that companion
+  outfits must be equipped through the vanilla trade menu.
+- For player teammates, keep the current vanilla outfit in place and put the
+  generated outfit instance in their inventory without forcing EquipObject.
+  The player can equip it through the vanilla trade menu.
+- Kept the existing OMOD, material, generated-instance, and managed-item cleanup
+  logic unchanged for ordinary NPCs and the player.
+
 ## 1.1.1
 
 - Compared with 1.1.0, fixed several bugs encountered during runtime on the AE

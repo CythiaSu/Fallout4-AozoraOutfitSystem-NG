@@ -36,7 +36,7 @@ namespace fs = std::filesystem;
 
 OUTFITMANAGER_EXPORT F4SE::PluginVersionData F4SEPlugin_Version = []() noexcept {
     F4SE::PluginVersionData v{};
-    v.PluginVersion({ 1, 1, 1, 0 });
+    v.PluginVersion({ 1, 1, 2, 0 });
     v.PluginName("OutfitManager");
     v.AuthorName("OutfitManager Author");
     v.UsesAddressLibrary(true);
@@ -557,6 +557,7 @@ static constexpr int kOutfitManagerViewOrder = 1000;
 
 static bool IsSelectableTarget(RE::Actor* a);
 static bool IsActorInPowerArmor(RE::Actor* a);
+static bool IsPlayerTeammateNative(RE::Actor* actor);
 static bool IsIgnoredOutfitArmor(RE::TESForm* f);
 static bool IsManagedOutfitArmor(RE::TESForm* f);
 static OutfitTargetState CheckOutfitTargetState(RE::Actor* actor, bool allowSharedTemplate);
@@ -851,7 +852,7 @@ static void FinishAttachedActorOutfitReapply(
 
 static void ScheduleAttachedActorOutfitReapply(RE::Actor* actor) {
     auto* player = RE::PlayerCharacter::GetSingleton();
-    if (!actor || actor == player || !IsSelectableTarget(actor)) return;
+    if (!actor || actor == player || IsPlayerTeammateNative(actor) || !IsSelectableTarget(actor)) return;
     ClearExpiredBusyState();
     if (g_eqBusy || g_randBusy) return;
 
@@ -3312,9 +3313,12 @@ static void OnMenuEquipSlot(const char* js) {
             g_curSlot = slot;
             WriteState();
         }
+        const bool inventoryOnly = IsPlayerTeammateNative(actor);
         SendUiResult("equip", result > 0, slot,
-            result > 0 ? "套装已穿戴" : "换装失败",
-            "\"count\":" + std::to_string((std::max)(result, 0)));
+            result > 0 ? (inventoryOnly ?
+                "服装已放入目标的背包，请在交易界面中选择装备。" : "套装已穿戴") : "换装失败",
+            "\"count\":" + std::to_string((std::max)(result, 0)) +
+                ",\"inventoryOnly\":" + std::string(inventoryOnly ? "true" : "false"));
     });
 }
 
@@ -4094,6 +4098,12 @@ static bool IsStudioOutfitArmor(RE::TESForm* f) {
 static bool IsActorInPowerArmor(RE::Actor* a) {
     if (!a) return false;
     try { return RE::PowerArmor::ActorInPowerArmor(*a); } catch (...) { return false; }
+}
+// Fallout 4's actor flags expose the player-teammate state at bit 26.
+static constexpr std::uint32_t kActorTeammateFlag = 1u << 26;
+static bool IsPlayerTeammateNative(RE::Actor* actor) {
+    return actor && actor != RE::PlayerCharacter::GetSingleton() &&
+        (actor->niFlags.flags & kActorTeammateFlag) != 0;
 }
 static bool IsHumanoidOutfitTarget(RE::TESNPC* npc) {
     if (!npc) return false;
@@ -4931,7 +4941,7 @@ static std::string Summ(int s) {
 }
 
 // ======== Native Functions ========
-RE::BSFixedString OM_GetPluginVersion(std::monostate) { return "1.1.1"; }
+RE::BSFixedString OM_GetPluginVersion(std::monostate) { return "1.1.2"; }
 RE::BSFixedString OM_GetSlotPath(std::monostate, int s) { return SlotPath(s).string().c_str(); }
 bool OM_IsMenuAvailable(std::monostate) { return GetModuleHandleW(L"PrismaUI_F4.dll") != nullptr; }
 bool OM_PreparePlayerPreview(std::monostate) {
@@ -5093,6 +5103,7 @@ static bool OpenMenuInternal(
     const bool confirmResetDefault = GetBoolSetting("bConfirmResetDefault", true);
     const bool confirmClearSavedOutfit = GetBoolSetting("bConfirmClearSavedOutfit", true);
     const bool confirmOverwriteSavedOutfit = GetBoolSetting("bConfirmOverwriteSavedOutfit", true);
+    const bool confirmCompanionInventory = GetBoolSetting("bConfirmCompanionInventory", true);
     const int quickOutfitSortMode = std::clamp(GetIntSetting("iQuickOutfitSortMode", 0), 0, 1);
 
     std::string itemsJson = "[";
@@ -5127,6 +5138,7 @@ static bool OpenMenuInternal(
                         ",\"confirmResetDefault\":" + (confirmResetDefault ? "true" : "false") +
                         ",\"confirmClearSavedOutfit\":" + (confirmClearSavedOutfit ? "true" : "false") +
                         ",\"confirmOverwriteSavedOutfit\":" + (confirmOverwriteSavedOutfit ? "true" : "false") +
+                        ",\"confirmCompanionInventory\":" + (confirmCompanionInventory ? "true" : "false") +
                         "}" +
                         ",\"targets\":" + targetsJson +
                         ",\"slotSummaries\":" + summaries + "}";
@@ -5719,6 +5731,9 @@ bool OM_IsMenuActionTargetPowerArmorBlocked(std::monostate) {
     auto* actor = ResolveMenuActionActor();
     return !actor || IsActorInPowerArmor(actor);
 }
+bool OM_IsMenuActionTargetPlayerTeammate(std::monostate) {
+    return IsPlayerTeammateNative(ResolveMenuActionActor());
+}
 int OM_SaveMenuActionTargetOutfit(std::monostate, int slot) {
     EnsureCacheLoaded();
     auto* actor = ResolveMenuActionActor();
@@ -6179,8 +6194,11 @@ static int AddAndEquipSavedItem(
             " result=" + (modsPrepared ? "1" : "0"));
     }
 
-    const bool lockNpcEquipState = actor != RE::PlayerCharacter::GetSingleton() && trackManaged;
-    PrepareNpcInventoryTransfer(actor, object, equipManager);
+    const bool inventoryOnlyTeammate = !equipNow && IsPlayerTeammateNative(actor);
+    const bool lockNpcEquipState = actor != RE::PlayerCharacter::GetSingleton() && trackManaged && equipNow;
+    if (!inventoryOnlyTeammate) {
+        PrepareNpcInventoryTransfer(actor, object, equipManager);
+    }
     AddOutfitItemToInventory(actor, object, createdExtra, silentAdd);
 
     auto* inventoryItem = FindInventoryItem(actor, object);
@@ -8044,11 +8062,15 @@ static int EquipOutfitForActor(
         previousManaged = g_mi[actor->GetFormID()].m;
         g_mi[actor->GetFormID()].m.clear();
     }
-    // Match the workbench preview path: fully clear the old worn stacks before
-    // equipping the next outfit. Equipping first caused a visible overlap with
-    // the Vault 111 suit and the later unequip invalidated body/heel updates.
-    for (const auto& oldStack : oldEquippedStacks) {
-        UnequipExistingStack(actor, { oldStack.fid, oldStack.extra });
+    // A companion keeps the current vanilla outfit until the player equips the
+    // generated item through the normal trade menu. Never remove that outfit
+    // before the inventory-only operation has completed.
+    if (!IsPlayerTeammateNative(actor)) {
+        // Match the workbench preview path: fully clear the old worn stacks
+        // before equipping the next outfit.
+        for (const auto& oldStack : oldEquippedStacks) {
+            UnequipExistingStack(actor, { oldStack.fid, oldStack.extra });
+        }
     }
     RemovePreviousManagedItems(actor, previousManaged);
 
@@ -8056,7 +8078,15 @@ static int EquipOutfitForActor(
     std::vector<std::uint32_t> newlyManaged;
     for (const auto& item : items) {
         bool managed = false;
-        equippedCount += AddAndEquipSavedItem(actor, item, managed, true, nullptr, true, nullptr, true);
+        equippedCount += AddAndEquipSavedItem(
+            actor,
+            item,
+            managed,
+            true,
+            nullptr,
+            !IsPlayerTeammateNative(actor),
+            nullptr,
+            true);
         if (managed) newlyManaged.push_back(item.fid);
     }
 
@@ -8068,9 +8098,16 @@ static int EquipOutfitForActor(
         }
         WriteActors();
     }
-    if (equippedCount > 0) {
+    if (equippedCount > 0 && !IsPlayerTeammateNative(actor)) {
         SetActiveSlotForActor(actor, slot);
         IncrementSlotUsageCount(slot);
+    }
+    if (equippedCount > 0 && IsPlayerTeammateNative(actor) && !g_menuOpen) {
+        RE::SendHUDMessage::ShowHUDMessage(
+            "服装已放入目标的背包，请在交易界面中选择装备。",
+            nullptr,
+            true,
+            false);
     }
     if (actor != RE::PlayerCharacter::GetSingleton()) {
         RefreshActorAppearance(actor, true);
@@ -8080,7 +8117,7 @@ static int EquipOutfitForActor(
         RefreshActorAppearance(actor, true);
         LogLine("1.1 full-menu player outfit refresh submitted slot=" + std::to_string(slot));
     }
-    LogLine("2.0 native equip target=" + FormIDHex(actor->formID) + " slot=" + std::to_string(slot) + " equipped=" + std::to_string(equippedCount) + "/" + std::to_string(items.size()));
+    LogLine("2.0 native outfit apply target=" + FormIDHex(actor->formID) + " slot=" + std::to_string(slot) + " placed=" + std::to_string(equippedCount) + "/" + std::to_string(items.size()));
     return equippedCount;
 }
 int OM_EquipMenuActionTargetOutfit(std::monostate, int slot) {
@@ -8441,7 +8478,7 @@ bool RegisterPapyrus(RE::BSScript::IVirtualMachine* vm) {
     B(AddSaveOutfitItem); B(CommitSaveOutfit); B(LoadOutfit);
     B(GetMenuTarget); B(GetMenuActionTarget); B(GetMenuActionTargetRef); B(GetCameraTarget);
     B(HasMenuActionTarget); B(GetMenuActionTargetSex); B(GetMenuActionTargetName);
-    B(IsMenuActionTargetPowerArmorBlocked); B(SaveMenuActionTargetOutfit);
+    B(IsMenuActionTargetPowerArmorBlocked); B(IsMenuActionTargetPlayerTeammate); B(SaveMenuActionTargetOutfit);
     B(LoadMenuActionTargetOutfit); B(IsMenuActionTargetWearingOutfit); B(EquipMenuActionTargetOutfit);
     B(ResetMenuActionTargetOutfit);
     B(IsWearingOutfitNative); B(EquipOutfitNative);

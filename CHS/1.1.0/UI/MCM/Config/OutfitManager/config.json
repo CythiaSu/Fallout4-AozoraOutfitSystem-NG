@@ -66,6 +66,7 @@
       "content": [
         { "type": "section", "text": "提示信息" },
         { "id": "bEnableOutfitNotifications:Profile1", "type": "switcher", "text": "显示换装通知", "help": "显示换装完成、保存成功等状态通知。", "valueOptions": { "sourceType": "ModSettingBool" } },
+        { "id": "bConfirmCompanionInventory:Profile1", "type": "switcher", "text": "队友换装强提示", "help": "队友换装时显示必须确认的说明弹窗，提醒你到交易界面手动装备。默认开启。", "valueOptions": { "sourceType": "ModSettingBool" } },
         { "type": "section", "text": "工作台提示" },
         { "id": "bWarnWorkbenchNudity:Profile1", "type": "switcher", "text": "进入工作台前提示裸露", "help": "进入工作台前显示裸露内容提示。无论是否显示此提示，工作台都会从角色的当前真实穿着开始编辑。默认关闭。", "valueOptions": { "sourceType": "ModSettingBool" } },
         { "type": "section", "text": "确认弹窗" },

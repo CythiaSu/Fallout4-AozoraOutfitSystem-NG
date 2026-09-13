@@ -1,7 +1,7 @@
 # Fallout 4 Aozora Outfit System NG
 
 ![Stable](https://img.shields.io/badge/status-stable-2ea043)
-![Version](https://img.shields.io/badge/version-NG%201.1.1-58a6ff)
+![Version](https://img.shields.io/badge/version-NG%201.1.2-58a6ff)
 ![Languages](https://img.shields.io/badge/languages-CHS%20%7C%20EN-f0c36a)
 ![Input](https://img.shields.io/badge/input-keyboard%20%7C%20mouse%20%7C%20gamepad-8957e5)
 
@@ -10,7 +10,7 @@
 ### 项目简介
 
 青空服装管理系统 NG 是 Fallout 4 Aozora Outfit System 的次世代版本。
-本版本从原有版本出发进行了大量重构和更新，当前正式版本为 **NG 1.1.1**。
+本版本从原有版本出发进行了大量重构和更新，当前正式版本为 **NG 1.1.2**。
 
 项目对外名称升级为 NG，但为了保留已有套装数据和配置的兼容性，游戏内的
 插件、脚本、MCM 和数据目录标识仍保持为 OutfitManager。
@@ -30,6 +30,8 @@
    MCM 调节项，预览结束后会清理临时光照引用。
 6. **NPC 换装持久化**：NPC 在快速旅行后重新载入场景时，会自动检查并恢复
    最近应用的套装，避免服装回到原版。
+7. **队友换装**：成为队友后，系统会把带有完整改造数据的服装加入队友背包，
+   不强制自动装备；玩家通过原版交易界面手动装备，避免队友装备评级导致裸体或闪烁。
 
 ### 主要功能
 
@@ -63,8 +65,8 @@
 ### 安装
 
 1. 安装全部与当前 Fallout 4 运行时匹配的前置。
-2. 在 MO2 中安装 Aozora_Outfit_Management_System_NG_1.1.1_CHS.7z 或
-   Aozora_Outfit_Management_System_NG_1.1.1_EN.7z。
+2. 在 MO2 中安装 Aozora_Outfit_Management_System_NG_1.1.2_CHS.7z 或
+   Aozora_Outfit_Management_System_NG_1.1.2_EN.7z。
 3. 只选择一个语言版本，并确认它位于相关框架之后。
 4. 启动游戏后确认 MCM 已加载，再使用快捷键或工作台入口。
 
@@ -132,7 +134,7 @@ Papyrus 编译器编译。完整的源码、构建和打包流程见
 
 Aozora Outfit System NG is the next-generation version of Fallout 4 Aozora
 Outfit System. It contains a large-scale refactor and extensive updates over
-   the previous version. The current stable release is **NG 1.1.1**.
+   the previous version. The current stable release is **NG 1.1.2**.
 
 The public product name is now NG. For compatibility with existing outfit data
 and settings, the in-game plugin, scripts, MCM identifiers, and data directory
@@ -160,6 +162,10 @@ still use OutfitManager.
 6. **Persistent NPC outfits**: when an NPC's cell is reattached or fully loaded
    after fast travel, the last applied saved outfit is checked and restored
    instead of allowing the vanilla outfit to replace it.
+7. **Companion outfits**: after recruitment, the manager adds the complete
+   modified outfit instance to the companion's inventory without force-equipping
+   it. Equip it manually through the vanilla trade menu to avoid companion
+   equipment-rating conflicts.
 
 ### Main Features
 
@@ -198,8 +204,8 @@ OutfitManager package alongside NG.
 ### Installation
 
 1. Install all prerequisites matching the current Fallout 4 runtime.
-2. Install Aozora_Outfit_Management_System_NG_1.1.1_CHS.7z or
-   Aozora_Outfit_Management_System_NG_1.1.1_EN.7z through MO2.
+2. Install Aozora_Outfit_Management_System_NG_1.1.2_CHS.7z or
+   Aozora_Outfit_Management_System_NG_1.1.2_EN.7z through MO2.
 3. Choose one language package and place it after the required frameworks.
 4. Start the game, confirm that MCM has loaded, then use the hotkeys or
    workbench entry points.

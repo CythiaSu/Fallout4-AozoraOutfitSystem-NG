@@ -591,9 +591,16 @@ Function _LoadSelectedMenuTarget(Int aiSlot) Global
         Return
     EndIf
     If iResult > 0
-        OMNative.SetLastEquippedSlot(aiSlot)
+        Bool bInventoryOnly = OMNative.IsMenuActionTargetPlayerTeammate()
+        If !bInventoryOnly
+            OMNative.SetLastEquippedSlot(aiSlot)
+        EndIf
         OMNative.FinishEquipAction()
-        _NotifyOutfitInfo("Outfit restored.\nTarget: " + OMNative.GetMenuActionTargetName() + "\nSlot: " + aiSlot + "\nEquipped: " + iResult + "\n\nOutfit: " + OMNative.GetSavedOutfitSummary(aiSlot))
+        If bInventoryOnly
+            _NotifyOutfitInfo("The outfit has been added to the target's inventory. Please equip it through the trade menu.")
+        Else
+            _NotifyOutfitInfo("Outfit restored.\nTarget: " + OMNative.GetMenuActionTargetName() + "\nSlot: " + aiSlot + "\nEquipped: " + iResult + "\n\nOutfit: " + OMNative.GetSavedOutfitSummary(aiSlot))
+        EndIf
     Else
         OMNative.FinishEquipAction()
         Debug.Notification("Restore failed.\nSlot: " + aiSlot)
@@ -638,9 +645,13 @@ Function _RandomSelectedMenuTarget() Global
         Return
     EndIf
     If iResult > 0
-        OMNative.SetLastEquippedSlot(iChosenSlot)
+        Bool bInventoryOnly = OMNative.IsMenuActionTargetPlayerTeammate()
         OMNative.FinishRandom(iChosenSlot)
-        _NotifyOutfitInfo("Random outfit restored.\nTarget: " + OMNative.GetMenuActionTargetName() + "\nSlot: " + iChosenSlot + "\nEquipped: " + iResult + "\n\nOutfit: " + OMNative.GetSavedOutfitSummary(iChosenSlot))
+        If bInventoryOnly
+            _NotifyOutfitInfo("The outfit has been added to the target's inventory. Please equip it through the trade menu.")
+        Else
+            _NotifyOutfitInfo("Random outfit restored.\nTarget: " + OMNative.GetMenuActionTargetName() + "\nSlot: " + iChosenSlot + "\nEquipped: " + iResult + "\n\nOutfit: " + OMNative.GetSavedOutfitSummary(iChosenSlot))
+        EndIf
     Else
         OMNative.FinishRandom(0)
         Debug.Notification("Random restore failed.\nSlot: " + iChosenSlot)
@@ -972,7 +983,11 @@ Function OnMcmLoadHotkey() Global
     EndIf
     If iResult > 0
         OMNative.FinishEquipAction()
-        Debug.Notification("Equipped for " + sTargetName + ": " + OMNative.GetSavedOutfitName(iSlot))
+        If OMNative.IsMenuActionTargetPlayerTeammate()
+            Debug.Notification("The outfit has been added to the target's inventory. Please equip it through the trade menu.")
+        Else
+            Debug.Notification("Equipped for " + sTargetName + ": " + OMNative.GetSavedOutfitName(iSlot))
+        EndIf
     ElseIf iResult == -2
         OMNative.FinishEquipAction()
         Debug.Notification("Equip failed: the outfit does not match the target.")
@@ -1052,7 +1067,11 @@ Function OnMcmRandomHotkey() Global
         EndIf
         If iResult > 0
             OMNative.FinishRandom(iChosenSlot)
-            Debug.Notification("Random outfit equipped for " + sTargetName + ": " + OMNative.GetSavedOutfitName(iChosenSlot))
+            If OMNative.IsMenuActionTargetPlayerTeammate()
+                Debug.Notification("The outfit has been added to the target's inventory. Please equip it through the trade menu.")
+            Else
+                Debug.Notification("Random outfit equipped for " + sTargetName + ": " + OMNative.GetSavedOutfitName(iChosenSlot))
+            EndIf
             Return
         EndIf
 
@@ -1136,7 +1155,11 @@ Function _RestoreNearestMatchingOutfit(Int aiDirection) Global
         EndIf
         If iResult > 0
             OMNative.FinishEquipAction()
-            Debug.Notification("Equipped for " + sTargetName + ": " + OMNative.GetSavedOutfitName(iChosenSlot))
+            If OMNative.IsMenuActionTargetPlayerTeammate()
+                Debug.Notification("The outfit has been added to the target's inventory. Please equip it through the trade menu.")
+            Else
+                Debug.Notification("Equipped for " + sTargetName + ": " + OMNative.GetSavedOutfitName(iChosenSlot))
+            EndIf
             Return
         EndIf
 

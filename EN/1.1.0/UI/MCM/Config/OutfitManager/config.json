@@ -66,6 +66,7 @@
       "content": [
         { "type": "section", "text": "Notifications" },
         { "id": "bEnableOutfitNotifications:Profile1", "type": "switcher", "text": "Show Outfit Notifications", "help": "Show status notifications for dressing and saving.", "valueOptions": { "sourceType": "ModSettingBool" } },
+        { "id": "bConfirmCompanionInventory:Profile1", "type": "switcher", "text": "Companion Outfit Prompt", "help": "Show a required confirmation dialog after adding an outfit to a companion's inventory. Enabled by default.", "valueOptions": { "sourceType": "ModSettingBool" } },
         { "type": "section", "text": "Studio Warning" },
         { "id": "bWarnWorkbenchNudity:Profile1", "type": "switcher", "text": "Warn About Nudity Before Studio", "help": "Show a nudity warning before entering the studio. The studio always starts from the character's actual outfit. Disabled by default.", "valueOptions": { "sourceType": "ModSettingBool" } },
         { "type": "section", "text": "Confirmation Dialogs" },

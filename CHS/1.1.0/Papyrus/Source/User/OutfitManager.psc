@@ -591,9 +591,16 @@ Function _LoadSelectedMenuTarget(Int aiSlot) Global
         Return
     EndIf
     If iResult > 0
-        OMNative.SetLastEquippedSlot(aiSlot)
+        Bool bInventoryOnly = OMNative.IsMenuActionTargetPlayerTeammate()
+        If !bInventoryOnly
+            OMNative.SetLastEquippedSlot(aiSlot)
+        EndIf
         OMNative.FinishEquipAction()
-        _NotifyOutfitInfo("套装已还原。\n目标：" + OMNative.GetMenuActionTargetName() + "\n槽位：" + aiSlot + "\n已穿戴：" + iResult + "\n\n套装：" + OMNative.GetSavedOutfitSummary(aiSlot))
+        If bInventoryOnly
+            _NotifyOutfitInfo("服装已放入目标的背包，请在交易界面中选择装备。")
+        Else
+            _NotifyOutfitInfo("套装已还原。\n目标：" + OMNative.GetMenuActionTargetName() + "\n槽位：" + aiSlot + "\n已穿戴：" + iResult + "\n\n套装：" + OMNative.GetSavedOutfitSummary(aiSlot))
+        EndIf
     Else
         OMNative.FinishEquipAction()
         Debug.Notification("还原失败。\n槽位：" + aiSlot)
@@ -638,9 +645,13 @@ Function _RandomSelectedMenuTarget() Global
         Return
     EndIf
     If iResult > 0
-        OMNative.SetLastEquippedSlot(iChosenSlot)
+        Bool bInventoryOnly = OMNative.IsMenuActionTargetPlayerTeammate()
         OMNative.FinishRandom(iChosenSlot)
-        _NotifyOutfitInfo("随机套装已还原。\n目标：" + OMNative.GetMenuActionTargetName() + "\n槽位：" + iChosenSlot + "\n已穿戴：" + iResult + "\n\n套装：" + OMNative.GetSavedOutfitSummary(iChosenSlot))
+        If bInventoryOnly
+            _NotifyOutfitInfo("服装已放入目标的背包，请在交易界面中选择装备。")
+        Else
+            _NotifyOutfitInfo("随机套装已还原。\n目标：" + OMNative.GetMenuActionTargetName() + "\n槽位：" + iChosenSlot + "\n已穿戴：" + iResult + "\n\n套装：" + OMNative.GetSavedOutfitSummary(iChosenSlot))
+        EndIf
     Else
         OMNative.FinishRandom(0)
         Debug.Notification("随机还原失败。\n槽位：" + iChosenSlot)
@@ -971,7 +982,11 @@ Function OnMcmLoadHotkey() Global
     EndIf
     If iResult > 0
         OMNative.FinishEquipAction()
-        Debug.Notification("已为" + sTargetName + "装备：" + OMNative.GetSavedOutfitName(iSlot))
+        If OMNative.IsMenuActionTargetPlayerTeammate()
+            Debug.Notification("服装已放入目标的背包，请在交易界面中选择装备。")
+        Else
+            Debug.Notification("已为" + sTargetName + "装备：" + OMNative.GetSavedOutfitName(iSlot))
+        EndIf
     ElseIf iResult == -2
         OMNative.FinishEquipAction()
         Debug.Notification("装备失败：套装与目标性别不匹配。")
@@ -1051,7 +1066,11 @@ Function OnMcmRandomHotkey() Global
         EndIf
         If iResult > 0
             OMNative.FinishRandom(iChosenSlot)
-            Debug.Notification("已为" + sTargetName + "随机换装：" + OMNative.GetSavedOutfitName(iChosenSlot))
+            If OMNative.IsMenuActionTargetPlayerTeammate()
+                Debug.Notification("服装已放入目标的背包，请在交易界面中选择装备。")
+            Else
+                Debug.Notification("已为" + sTargetName + "随机换装：" + OMNative.GetSavedOutfitName(iChosenSlot))
+            EndIf
             Return
         EndIf
 
@@ -1135,7 +1154,11 @@ Function _RestoreNearestMatchingOutfit(Int aiDirection) Global
         EndIf
         If iResult > 0
             OMNative.FinishEquipAction()
-            Debug.Notification("已为" + sTargetName + "装备：" + OMNative.GetSavedOutfitName(iChosenSlot))
+            If OMNative.IsMenuActionTargetPlayerTeammate()
+                Debug.Notification("服装已放入目标的背包，请在交易界面中选择装备。")
+            Else
+                Debug.Notification("已为" + sTargetName + "装备：" + OMNative.GetSavedOutfitName(iChosenSlot))
+            EndIf
             Return
         EndIf
 

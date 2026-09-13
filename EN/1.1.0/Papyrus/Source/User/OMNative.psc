@@ -17,6 +17,7 @@ Bool Function HasMenuActionTarget() Global Native
 Int Function GetMenuActionTargetSex() Global Native
 String Function GetMenuActionTargetName() Global Native
 Bool Function IsMenuActionTargetPowerArmorBlocked() Global Native
+Bool Function IsMenuActionTargetPlayerTeammate() Global Native
 Int Function SaveMenuActionTargetOutfit(Int aiSlot) Global Native
 Int Function LoadMenuActionTargetOutfit(Int aiSlot) Global Native
 Bool Function IsMenuActionTargetWearingOutfit(Int aiSlot) Global Native
